@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from lib import startup_save
+from lib.schema import SourceItem
 from lib.startup_doctor import coverage_guidance, diagnose_sources
 from lib.startup_export import JSON_SCHEMA_VERSION, export_payload
 from lib.startup_goat import research
@@ -24,6 +25,18 @@ def test_json_contract_is_versioned_and_secret_free():
     dumped = json.dumps(payload)
     assert "do-not-export" not in dumped
     assert {"profiles", "coverage", "artifacts", "request"} <= payload.keys()
+
+
+def test_secret_like_raw_items_disable_public_publication(tmp_path: Path):
+    run = _run()
+    run.entities[0].items.append(SourceItem(
+        item_id="secret-item", source="startup-india", title="public title",
+        body="Bearer ghp_1234567890abcdef", url="https://startupindia.gov.in/acme",
+    ))
+    bundle = startup_save.save_bundle(run, save_dir=tmp_path, emit="json")
+    assert bundle.publication_allowed is False
+    evidence = next(path for key, path in bundle.artifacts.items() if key.startswith("evidence:"))
+    assert "ghp_1234567890abcdef" not in evidence.read_text()
 
 
 def test_save_collision_manifest_last_and_hashes(tmp_path: Path):

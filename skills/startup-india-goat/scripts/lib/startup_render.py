@@ -29,7 +29,7 @@ _RUBRIC_FIELDS = {
     "evidence_quality": set(),
     "risks": set(),
 }
-_SAFE_URL = re.compile(r"^https://[^\s<>\"']+$", re.I)
+_SAFE_URL = re.compile(r"^https://[^\s<>\"'()\[\]\\]+$", re.I)
 
 
 def _text(value: object) -> str:

@@ -18,6 +18,7 @@ from .startup_sources import resolve_source
 
 DEFAULT_STARTUP_MEMORY_DIR = Path.home() / "Documents" / "StartupIndiaGOAT"
 _SECRET = re.compile(r"(?:token|secret|password|cookie|authorization|api[_-]?key|access[_-]?token)", re.I)
+_SECRET_VALUE = re.compile(r"(?:bearer\s+[A-Za-z0-9._~+/=-]{12,}|(?:gh[pousr]|sk|xox[baprs])_[A-Za-z0-9_-]{12,}|AIza[0-9A-Za-z_-]{20,})", re.I)
 
 
 def startup_memory_dir(value: str | os.PathLike[str] | None = None) -> Path:
@@ -33,7 +34,7 @@ def _private_value(value: Any) -> bool:
         return any(_SECRET.search(str(key)) or _private_value(child) for key, child in value.items())
     if isinstance(value, (list, tuple, set)):
         return any(_private_value(child) for child in value)
-    return isinstance(value, str) and bool(_SECRET.search(value))
+    return isinstance(value, str) and bool(_SECRET.search(value) or _SECRET_VALUE.search(value))
 
 
 def _public_profile(profile: StartupProfile) -> bool:
@@ -75,7 +76,7 @@ def _sanitize(value: Any, *, key: str = "") -> Any:
         return {str(k): _sanitize(v, key=str(k)) for k, v in value.items() if not _SECRET.search(str(k))}
     if isinstance(value, (list, tuple, set, frozenset)):
         return [_sanitize(item, key=key) for item in value]
-    if isinstance(value, str) and _SECRET.search(value):
+    if isinstance(value, str) and (_SECRET.search(value) or _SECRET_VALUE.search(value)):
         return "[REDACTED]"
     return value
 

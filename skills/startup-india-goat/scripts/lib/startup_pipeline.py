@@ -91,6 +91,7 @@ def _generic_items(report: Any, entity_id: str, source: str, limit: int) -> list
             continue
         metadata["entity_id"] = entity_id
         metadata["startup_source"] = source
+        item.source = source
         item.metadata = metadata
         key = (item.item_id, item.url)
         if key in seen:

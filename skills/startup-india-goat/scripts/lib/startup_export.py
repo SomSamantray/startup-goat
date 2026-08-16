@@ -50,7 +50,11 @@ def _profile(profile: StartupProfile, *, public_only: bool = True) -> dict[str, 
     return _safe(value)
 
 
-def _observed_access_state(source: str, state: str) -> str:
+def _observed_access_state(source: str, state: str, detail: str | None = None) -> str:
+    detail_text = str(detail or "").casefold()
+    for marker in ("paywalled", "captcha", "quota-exhausted", "browser-unavailable", "login-required"):
+        if marker in detail_text:
+            return marker
     if state in {"ok", "no-results"}:
         try:
             return "public" if resolve_source(source).public else "private-session"
@@ -92,7 +96,7 @@ def export_payload(value: Any, *, artifact_paths: Mapping[str, str] | None = Non
                 outcomes = {}
                 for source, observed in result.outcomes.items():
                     entry = dict(to_dict(observed))
-                    entry["access_state"] = _observed_access_state(source, str(entry.get("state", "unknown")))
+                    entry["access_state"] = _observed_access_state(source, str(entry.get("state", "unknown")), entry.get("detail"))
                     outcomes[source] = entry
                 entity_coverage[result.identity.entity_id] = {"outcomes": outcomes, "errors": list(result.errors)}
             coverage = {

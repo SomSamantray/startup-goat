@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "source": "tracxn",
+  "entity_id": "startup_1",
+  "page_url": "https://platform.tracxn.com/a/d/company/1/acme",
+  "page_title": "Acme profile",
+  "visible_fields": {"name": "Acme", "stage": "Series A", "employee_count": 42},
+  "visible_rows": [{"label": "Revenue", "value": "INR 10 crore"}],
+  "public_links": ["https://platform.tracxn.com/a/d/company/1/acme"],
+  "access_state": "private-session",
+  "captured_at": "2099-01-01T00:00:00Z",
+  "ttl_seconds": 900,
+  "session_classification": "private-session"
+}

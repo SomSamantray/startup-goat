@@ -62,9 +62,9 @@ def access_outcome(source: str, access_state: str, *, items: int = 0, detail: st
     return outcome(source, state, items=items, detail=detail)
 
 
-def outcome(source: str, state: str, *, items: int = 0, detail: str | None = None) -> SourceOutcome:
+def outcome(source: str, state: str, *, items: int = 0, detail: str | None = None, fix_hint: str | None = None) -> SourceOutcome:
     allowed = {"ok", "no-results", "partial", "rate-limited", "auth-failed", "unreachable", "timeout", "schema-drift", "skipped-unconfigured", "error"}
-    return SourceOutcome(source=source, state=state if state in allowed else "error", items_returned=items, detail=detail)
+    return SourceOutcome(source=source, state=state if state in allowed else "error", items_returned=items, detail=detail, fix_hint=fix_hint)
 
 
 def fetch_doc(url: str, *, source: str, allowed_domains: tuple[str, ...], timeout: float, fetcher: Callable[..., Any] | None):

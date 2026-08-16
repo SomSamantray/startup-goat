@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "source": "tracxn",
+  "entity_id": "startup_1",
+  "page_url": "https://platform.tracxn.com/a/d/company/1/acme",
+  "page_title": "Usage limit",
+  "visible_fields": {"message": "Upgrade required"},
+  "visible_rows": [],
+  "public_links": [],
+  "access_state": "quota-exhausted",
+  "captured_at": "2099-01-01T00:00:00Z",
+  "ttl_seconds": 900,
+  "session_classification": "private-session"
+}

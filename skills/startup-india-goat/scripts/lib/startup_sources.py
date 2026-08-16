@@ -62,6 +62,16 @@ def _startup_india_factory() -> StartupAdapter:
     return StartupIndiaAdapter()
 
 
+def _linkedin_factory() -> StartupAdapter:
+    from .linkedin_token import LinkedInTokenAdapter
+    return LinkedInTokenAdapter()
+
+
+def _tracxn_factory() -> StartupAdapter:
+    from .tracxn import TracxnAdapter
+    return TracxnAdapter()
+
+
 def _screener_factory() -> StartupAdapter:
     from .screener import ScreenerAdapter
     return ScreenerAdapter()
@@ -187,7 +197,7 @@ DEFAULT_SOURCE_REGISTRY: tuple[SourceCapability, ...] = (
     _registration(
         "linkedin", ("linkedin", "linkedin-token", "linkedin_token"), source_class="authorized",
         predicate=_has_linkedin_token, required_context_keys=("LINKEDIN_ACCESS_TOKEN",),
-        requires_consent=True, source_tier="primary",
+        requires_consent=True, source_tier="primary", adapter_factory=_linkedin_factory,
     ),
     _registration("yourstory", ("yourstory", "your-story"), source_tier="secondary", adapter_factory=_yourstory_factory),
     _registration("screener", ("screener", "screener.in"), source_tier="authoritative", adapter_factory=_screener_factory),
@@ -196,7 +206,7 @@ DEFAULT_SOURCE_REGISTRY: tuple[SourceCapability, ...] = (
     _registration("startup-india", ("startup-india", "startup_india", "startup india", "dpiit"), source_tier="authoritative", adapter_factory=_startup_india_factory),
     _registration(
         "tracxn", ("tracxn",), source_class="authorized", predicate=_has_tracxn_access,
-        requires_consent=True, source_tier="commercial",
+        requires_consent=True, source_tier="commercial", adapter_factory=_tracxn_factory,
     ),
 )
 

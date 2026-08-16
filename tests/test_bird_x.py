@@ -74,7 +74,7 @@ class TestVendoredBirdRuntime(unittest.TestCase):
         sweet_cookie_dir = (
             REPO_ROOT
             / "skills"
-            / "last30days"
+            / "startup-india-goat"
             / "scripts"
             / "lib"
             / "vendor"

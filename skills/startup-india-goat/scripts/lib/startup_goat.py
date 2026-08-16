@@ -65,6 +65,10 @@ class StartupRun:
     def group_profile(self) -> GroupProfile:
         return GroupProfile(profiles=list(self.profiles), query=self.request.raw_query)
 
+    def save(self, **options: Any) -> Any:
+        from .startup_save import save_bundle
+        return save_bundle(self, **options)
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "schema_version": "startup-india-goat/1.0",
@@ -246,6 +250,12 @@ def research(raw_query: str | Mapping[str, Any] | StartupRequest, **options: Any
     ), contract=contract, profiles=profiles)
 
 
+def research_and_save(raw_query: str | Mapping[str, Any] | StartupRequest, **options: Any) -> tuple[StartupRun, Any]:
+    save_options = {key: options.pop(key) for key in tuple(options) if key in {"save_dir", "emit", "private", "include_private_evidence"}}
+    run_result = research(raw_query, **options)
+    return run_result, run_result.save(**save_options)
+
+
 run = research
 run_startup_goat = research
 # Friendly names for host integrations that distinguish this contract from
@@ -253,4 +263,4 @@ run_startup_goat = research
 StartupGoatRequest = StartupRequest
 StartupGoatResult = StartupRun
 
-__all__ = ["DEFAULT_STARTUP_SOURCES", "StartupGoatRequest", "StartupGoatResult", "StartupRequest", "StartupRun", "build_source_plan", "parse_request", "research", "run", "run_startup_goat"]
+__all__ = ["DEFAULT_STARTUP_SOURCES", "StartupGoatRequest", "StartupGoatResult", "StartupRequest", "StartupRun", "build_source_plan", "parse_request", "research", "research_and_save", "run", "run_startup_goat"]

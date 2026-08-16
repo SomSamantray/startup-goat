@@ -2,7 +2,7 @@
 
 import pytest
 
-from skills.startup_india_goat.scripts.lib import x_judge
+from lib import x_judge
 
 
 class TestJudgeXCorpus:

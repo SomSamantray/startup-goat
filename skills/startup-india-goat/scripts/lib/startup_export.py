@@ -50,6 +50,20 @@ def _profile(profile: StartupProfile, *, public_only: bool = True) -> dict[str, 
     return _safe(value)
 
 
+def _observed_access_state(source: str, state: str) -> str:
+    if state in {"ok", "no-results"}:
+        try:
+            return "public" if resolve_source(source).public else "private-session"
+        except KeyError:
+            return "unknown"
+    return {
+        "auth-failed": "auth-failed", "skipped-unconfigured": "gated",
+        "rate-limited": "rate-limited", "timeout": "timeout",
+        "unreachable": "unreachable", "schema-drift": "schema-drift",
+        "partial": "partial", "error": "unknown",
+    }.get(state, "unknown")
+
+
 def export_payload(value: Any, *, artifact_paths: Mapping[str, str] | None = None,
                    coverage: Mapping[str, Any] | None = None,
                    request: Mapping[str, Any] | None = None,
@@ -78,10 +92,7 @@ def export_payload(value: Any, *, artifact_paths: Mapping[str, str] | None = Non
                 outcomes = {}
                 for source, observed in result.outcomes.items():
                     entry = dict(to_dict(observed))
-                    try:
-                        entry["access_state"] = "public" if resolve_source(source).public else "private-session"
-                    except KeyError:
-                        entry["access_state"] = "unknown"
+                    entry["access_state"] = _observed_access_state(source, str(entry.get("state", "unknown")))
                     outcomes[source] = entry
                 entity_coverage[result.identity.entity_id] = {"outcomes": outcomes, "errors": list(result.errors)}
             coverage = {

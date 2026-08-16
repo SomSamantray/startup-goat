@@ -54,6 +54,12 @@ def _publication_safe(run: Any, profiles: list[StartupProfile], *, public_only: 
     """Fail closed for private, gated, mixed, unknown, or failed evidence."""
     if not public_only or private or secret_tainted or not all(_public_profile(profile) for profile in profiles):
         return False
+    for result in getattr(getattr(run, "retrieval", None), "entities", ()):
+        for item in getattr(result, "items", ()):
+            metadata = getattr(item, "metadata", {}) or {}
+            if str(metadata.get("access_state", "public")).casefold() not in {"public", "public-http"}:
+                return False
+        return False
     request = getattr(run, "request", None)
     for source in getattr(request, "sources", ()):
         try:
@@ -150,12 +156,13 @@ def save_bundle(run: Any, *, save_dir: str | os.PathLike[str] | None = None, emi
         outcomes_by_entity = {entity_id: result.outcomes for entity_id, result in entity_results.items()}
         secret_tainted = any(_private_value(to_dict(item)) for result in entity_results.values() for item in getattr(result, "items", []))
         public_artifacts = _publication_safe(run, profiles, public_only=public_only, private=private, secret_tainted=secret_tainted)
+        allow_private_export = bool(include_private_evidence and not public_only and private)
         # Per-entity sanitized evidence is useful for audit but is not indexed.
         for profile in profiles:
             entity_dir = directory / "evidence"
             _mkdir(entity_dir, private)
             result = entity_results.get(profile.identity.entity_id)
-            allow_private = bool(include_private_evidence and not public_only and private)
+            allow_private = allow_private_export
             evidence = []
             for ref in profile.evidence:
                 try:
@@ -170,7 +177,9 @@ def save_bundle(run: Any, *, save_dir: str | os.PathLike[str] | None = None, emi
                     capability = resolve_source(item.source)
                 except KeyError:
                     continue
-                if not include_private_evidence and not capability.public:
+                metadata = getattr(item, "metadata", {}) or {}
+                access_state = str(metadata.get("access_state", "public")).casefold()
+                if not allow_private and (not capability.public or access_state not in {"public", "public-http"}):
                     continue
                 raw_items.append(_sanitize(to_dict(item)))
             path = _reserve(entity_dir, f"{_slug(profile.identity.display_name)}-evidence", ".json")
@@ -190,7 +199,9 @@ def save_bundle(run: Any, *, save_dir: str | os.PathLike[str] | None = None, emi
             path = _reserve(directory, stem, ".html"); created.append(path); _write(path, content, private); bundle.artifacts["html"] = path
         if "json" in requested:
             paths = {key: str(path.relative_to(directory)) for key, path in bundle.artifacts.items()}
-            content = export_json(run, artifact_paths=paths, public_only=public_only, status="partial" if getattr(getattr(run, "retrieval", None), "warnings", []) else "complete")
+            retrieval = getattr(run, "retrieval", None)
+            incomplete = bool(getattr(retrieval, "warnings", [])) or any(getattr(entity, "partial", False) for entity in getattr(retrieval, "entities", []))
+            content = export_json(run, artifact_paths=paths, public_only=not allow_private_export, status="partial" if incomplete else "complete")
             path = _reserve(directory, stem, ".json"); created.append(path); _write(path, content, private); bundle.artifacts["json"] = path
         # Only public markdown is eligible for the scoped library index.
         if public_artifacts and "markdown" in bundle.artifacts:
@@ -202,7 +213,8 @@ def save_bundle(run: Any, *, save_dir: str | os.PathLike[str] | None = None, emi
         statuses = diagnose_sources(public_only=public_only, outcomes=next(iter(outcomes_by_entity.values()), {}))
         bundle.guidance = coverage_guidance(statuses, public_only=public_only)
         bundle.publication_allowed = bool(public_artifacts and not _private_value(bundle.to_dict()))
-        bundle.status = "partial" if getattr(getattr(run, "retrieval", None), "warnings", []) or any(getattr(entity, "errors", []) for entity in getattr(getattr(run, "retrieval", None), "entities", [])) else "complete"
+        retrieval = getattr(run, "retrieval", None)
+        bundle.status = "complete" if getattr(retrieval, "complete", False) else "partial"
         manifest_data = {"schema_version": "startup-india-goat-manifest/1.0", "status": bundle.status, "created_at": datetime.now(timezone.utc).isoformat(), "publication_allowed": bundle.publication_allowed, "artifacts": {key: {"path": str(path.relative_to(directory)), "sha256": _hash(path), "mode": oct(path.stat().st_mode & 0o777)} for key, path in bundle.artifacts.items()}, "guidance": bundle.guidance}
         manifest = _reserve(directory, f"{stem}-manifest", ".json"); created.append(manifest); _write(manifest, json.dumps(manifest_data, indent=2, sort_keys=True) + "\n", private); bundle.manifest = manifest
         return bundle

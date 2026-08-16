@@ -133,8 +133,9 @@ def _identity_inputs(request: StartupRequest) -> tuple[list[StartupIdentity], li
             # A name supplied by the caller is a candidate accepted for this
             # run, not an invented legal identity. Optional identifiers remain
             # evidence supplied by the caller and are normalized by the model.
-            values.setdefault("state", "resolved")
-            values.setdefault("confidence", "high" if any(values.get(key) for key in ("domains", "tickers", "dpiit_ids", "exchange_ids")) else "low")
+            has_identifier = any(values.get(key) for key in ("domains", "tickers", "dpiit_ids", "exchange_ids", "handles"))
+            values.setdefault("state", "resolved" if has_identifier or values.get("user_confirmed") else "unresolved")
+            values.setdefault("confidence", "high" if has_identifier else "low")
             values["input_position"] = position
             identity = build_identity(name, **values)
         except (TypeError, ValueError):

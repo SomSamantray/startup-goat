@@ -12,9 +12,11 @@ PROFILE_RE = re.compile(r"/profile\.Startup\.([^./?#]+)\.html", re.I)
 
 class StartupIndiaAdapter:
     source = SOURCE
-    def fetch(self, *, entity_id: str, query: str = "", url: str | None = None, max_pages: int = 2,
+    def fetch(self, *, entity_id: str, query: str = "", url: str | None = None, profile_id: str | None = None, max_pages: int = 2,
               timeout: float = 15.0, fetcher: Callable[..., Any] | None = None, **_: Any) -> AdapterResult:
-        target = url or (f"https://www.startupindia.gov.in/content/sih/en/profile.Startup.{query}.html" if query and re.fullmatch(r"[A-Za-z0-9_-]+", query) else f"https://www.startupindia.gov.in/content/sih/en/search.html?roles=Startup&query={quote_plus(query)}")
+        # A brand name is a search query. Only an explicit profile identifier or
+        # URL may select the portal's profile route.
+        target = url or (f"https://www.startupindia.gov.in/content/sih/en/profile.Startup.{profile_id}.html" if profile_id and re.fullmatch(r"[A-Za-z0-9_-]+", profile_id) else f"https://www.startupindia.gov.in/content/sih/en/search.html?roles=Startup&query={quote_plus(query)}")
         try:
             response, doc, access = fetch_doc(target, source=SOURCE, allowed_domains=DOMAINS, timeout=timeout, fetcher=fetcher)
         except Exception as exc:

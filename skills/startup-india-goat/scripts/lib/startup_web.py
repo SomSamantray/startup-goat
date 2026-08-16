@@ -275,6 +275,10 @@ def fetch_public(url: str, *, allowed_domains: Iterable[str], timeout: float = 1
                  fetcher: Callable[[str, float], Any] | None = None,
                  max_bytes: int = 2_000_000) -> tuple[FetchResponse, ParsedDocument, str]:
     safe = validate_url(url, allowed_domains)
+    if fetcher is None:
+        # Validate DNS answers before opening a URL. A hostname allowlist alone
+        # does not prevent DNS rebinding to loopback or private address space.
+        validate_resolved_host(urllib.parse.urlsplit(safe).hostname or "")
     if fetcher is not None:
         try:
             raw = fetcher(safe, timeout)

@@ -72,8 +72,12 @@ def _generic_items(report: Any, entity_id: str, source: str, limit: int) -> list
     if source == "web":
         pools.extend(by_source.get(WEB_BRIDGE_NAME, []))
     if not pools:
+        allowed_sources = {source, WEB_BRIDGE_NAME} if source == "web" else {source}
         for candidate in getattr(report, "ranked_candidates", []) or []:
-            pools.extend(getattr(candidate, "source_items", []) or [])
+            pools.extend(
+                item for item in (getattr(candidate, "source_items", []) or [])
+                if isinstance(item, SourceItem) and item.source in allowed_sources
+            )
     result: list[SourceItem] = []
     seen: set[tuple[str, str]] = set()
     for original in pools:
@@ -125,7 +129,7 @@ def _adapter_result(value: Any, source: str, entity_id: str) -> AdapterResult:
 def _bind_adapter_items(result: AdapterResult, identity: StartupIdentity, source: str, limit: int) -> list[SourceItem]:
     items: list[SourceItem] = []
     for original in result.items[:limit]:
-        if not isinstance(original, SourceItem):
+        if not isinstance(original, SourceItem) or original.source != source:
             continue
         item = copy.deepcopy(original)
         metadata = dict(item.metadata or {})
@@ -172,9 +176,14 @@ def _run_source(identity: StartupIdentity, capability: SourceCapability, *, conf
         if mock and not any(key in adapter_kwargs for key in ("fetcher", "url", "browser_envelope", "envelope", "token_response", "token")):
             return [], SourceOutcome(source=source, state="no-results", attempted=False, detail="mock startup adapter has no fixture"), None
         adapter = capability.adapter_factory()
+        call_kwargs = dict(adapter_kwargs)
+        if source == "screener" and identity.tickers:
+            call_kwargs.setdefault("ticker", identity.tickers[0])
+        if source == "startup-india" and identity.dpiit_ids:
+            call_kwargs.setdefault("profile_id", identity.dpiit_ids[0])
         value = adapter.fetch(
             entity_id=identity.entity_id, query=identity.display_name,
-            config=dict(config), timeout=budget.timeout_seconds, mock=mock, **dict(adapter_kwargs),
+            config=dict(config), timeout=budget.timeout_seconds, mock=mock, **call_kwargs,
         )
         result = _adapter_result(value, source, identity.entity_id)
         items = _bind_adapter_items(result, identity, source, budget.max_items_per_source)

@@ -13,9 +13,11 @@ class ScreenerAdapter:
     source = SOURCE
     def fetch(self, *, entity_id: str, query: str = "", ticker: str | None = None, url: str | None = None,
               max_pages: int = 1, timeout: float = 15.0, fetcher: Callable[..., Any] | None = None, **_: Any) -> AdapterResult:
-        symbol = (ticker or query or "").strip().upper().lstrip("$")
-        if not url and not re.fullmatch(r"[A-Z0-9][A-Z0-9._-]{1,30}", symbol):
+        symbol = (ticker or "").strip().upper().lstrip("$")
+        if not url and not ticker:
             return AdapterResult([], outcome(SOURCE, "skipped-unconfigured", detail="not-applicable: no verified listed-company identifier"), {"entity_id": entity_id, "access_state": "not-applicable", "access_mode": "none"})
+        if not url and not re.fullmatch(r"[A-Z0-9][A-Z0-9._-]{1,30}", symbol):
+            return AdapterResult([], outcome(SOURCE, "skipped-unconfigured", detail="not-applicable: invalid listed-company identifier"), {"entity_id": entity_id, "access_state": "not-applicable", "access_mode": "none"})
         target = url or f"https://www.screener.in/company/{quote_plus(symbol)}/consolidated/"
         try:
             response, doc, access = fetch_doc(target, source=SOURCE, allowed_domains=DOMAINS, timeout=timeout, fetcher=fetcher)

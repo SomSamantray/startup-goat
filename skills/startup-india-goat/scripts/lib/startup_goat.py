@@ -6,8 +6,9 @@ from dataclasses import dataclass, field
 from typing import Any, Iterable, Mapping
 
 from .startup_identity import build_identity, quarantine
+from .startup_facts import extract_profile
 from .startup_pipeline import StartupBudgets, StartupEntityResult, StartupRetrievalResult, retrieve_group
-from .startup_schema import QuarantinedIdentity, StartupIdentity, to_dict
+from .startup_schema import GroupProfile, QuarantinedIdentity, StartupIdentity, StartupProfile, to_dict
 from .startup_sources import resolve_source, source_registry
 
 DEFAULT_STARTUP_SOURCES = tuple(capability.canonical_name for capability in source_registry() if capability.public)
@@ -50,6 +51,7 @@ class StartupRun:
     request: StartupRequest
     retrieval: StartupRetrievalResult
     contract: dict[str, Any]
+    profiles: list[StartupProfile] = field(default_factory=list)
 
     @property
     def entities(self) -> list[StartupEntityResult]:
@@ -58,6 +60,10 @@ class StartupRun:
     @property
     def quarantined(self) -> list[Any]:
         return self.retrieval.quarantined
+
+    @property
+    def group_profile(self) -> GroupProfile:
+        return GroupProfile(profiles=list(self.profiles), query=self.request.raw_query)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -73,6 +79,7 @@ class StartupRun:
                 "public_only": self.request.public_only,
                 "consent": self.request.consent,
             },
+            "profiles": [to_dict(profile) for profile in self.profiles],
             "entities": [
                 {
                     "identity": to_dict(result.identity),
@@ -230,10 +237,13 @@ def research(raw_query: str | Mapping[str, Any] | StartupRequest, **options: Any
     results = retrieve_group(identities, active_sources, config=request.config, public_only=request.public_only,
                              consent=request.consent, mock=request.mock, depth=request.depth,
                              budgets=request.budgets, adapter_kwargs=request.adapter_kwargs)
+    profiles = [extract_profile(identity, result.items, dimensions=request.dimensions,
+                                horizon_months=request.horizon_months)
+                for identity, result in zip(identities, results)]
     return StartupRun(request=request, retrieval=StartupRetrievalResult(
         entities=results, quarantined=quarantined, requested_sources=list(request.sources),
         source_plan={identity.entity_id: list(active_sources) for identity in identities}, warnings=warnings,
-    ), contract=contract)
+    ), contract=contract, profiles=profiles)
 
 
 run = research

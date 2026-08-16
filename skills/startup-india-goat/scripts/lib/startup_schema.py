@@ -130,6 +130,9 @@ class StartupProfile:
     horizon_months: int = 24
     generated_at: str | None = None
     schema_version: str = STARTUP_SCHEMA_VERSION
+    # Conflict records are deliberately opaque to transport callers but keep
+    # every competing value and its selected citation for human rendering.
+    conflicts: list[Any] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.horizon_months < 0:

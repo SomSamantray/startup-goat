@@ -1,21 +1,21 @@
 {
-  "name": "last30days-skill",
+  "name": "startup-india-goat-skill",
   "owner": {
     "name": "Matt Van Horn",
     "url": "https://github.com/mvanhorn"
   },
-  "description": "Marketplace for the last30days research plugin",
+  "description": "Evidence-backed research on Indian startups across public and explicitly authorized sources, with cited profiles, comparisons, and saved artifacts.",
   "plugins": [
     {
-      "name": "last30days",
-      "description": "Research any topic across Reddit, X, YouTube, TikTok, Instagram, Hacker News, Polymarket, GitHub, and 5+ more sources. AI agent scores by upvotes, likes, and real money - not editors.",
+      "name": "startup-india-goat",
+      "description": "Evidence-backed research on Indian startups across public and explicitly authorized sources, with cited profiles, comparisons, and saved artifacts.",
       "version": "3.21.0",
       "category": "productivity",
       "source": {
         "source": "url",
-        "url": "https://github.com/mvanhorn/last30days-skill.git"
+        "url": "https://github.com/mvanhorn/startup-india-goat-skill.git"
       },
-      "homepage": "https://github.com/mvanhorn/last30days-skill",
+      "homepage": "https://github.com/mvanhorn/startup-india-goat-skill",
       "keywords": [
         "last30days",
         "last 30 days"

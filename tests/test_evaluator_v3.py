@@ -196,7 +196,7 @@ class EvaluatorV3Tests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp:
             repo_dir = Path(tmp)
-            engine = repo_dir / "skills" / "last30days" / "scripts" / "last30days.py"
+            engine = repo_dir / "skills" / "startup-india-goat" / "scripts" / "last30days.py"
             engine.parent.mkdir(parents=True)
             engine.write_text('parser.add_argument("--json-profile")')
             completed = mock.Mock(returncode=0, stdout='{"topic":"x"}', stderr="")
@@ -228,7 +228,7 @@ class EvaluatorV3Tests(unittest.TestCase):
     def test_run_last30days_keeps_legacy_engine_implicit_raw_profile(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo_dir = Path(tmp)
-            engine = repo_dir / "skills" / "last30days" / "scripts" / "last30days.py"
+            engine = repo_dir / "skills" / "startup-india-goat" / "scripts" / "last30days.py"
             engine.parent.mkdir(parents=True)
             engine.write_text('parser.add_argument("--emit")')
             completed = mock.Mock(returncode=0, stdout='{"topic":"x"}', stderr="")

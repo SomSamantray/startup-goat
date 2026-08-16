@@ -107,13 +107,13 @@ class TestCompletenessLint:
 
 class TestDocumentedCliForms:
     def test_x_cookie_fixes_use_setup_with_browser_cookie_consent(self):
-        expected = "python3 skills/last30days/scripts/last30days.py setup --allow-browser-cookies"
+        expected = "python3 skills/startup-india-goat/scripts/last30days.py setup --allow-browser-cookies"
         assert prescriptions.get("x", "cookies_missing").fix_cli == expected
         assert prescriptions.get("x", "cookies_expired").fix_cli == expected
 
     def test_scrapecreators_fix_is_the_github_device_flow(self):
         entry = prescriptions.get("scrapecreators", "key_missing")
-        assert entry.fix_cli == "python3 skills/last30days/scripts/last30days.py setup --github"
+        assert entry.fix_cli == "python3 skills/startup-india-goat/scripts/last30days.py setup --github"
 
     def test_ytdlp_install_and_reinstall_reference_u1_health_strings(self):
         """Binary-class fixes reference U1's tables instead of restating them."""
@@ -190,7 +190,7 @@ class TestSharedWithQualityNudge:
         ``config.get("XAI_API_KEY")``); this guards the FIX text.
         """
         source = (
-            REPO_ROOT / "skills/last30days/scripts/lib/quality_nudge.py"
+            REPO_ROOT / "skills/startup-india-goat/scripts/lib/quality_nudge.py"
         ).read_text(encoding="utf-8")
         assert "brew " not in source
         assert "api.x.ai" not in source

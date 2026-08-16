@@ -29,7 +29,7 @@ import last30days as cli
 from lib import doctor, health
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL_MD = ROOT / "skills" / "last30days" / "SKILL.md"
+SKILL_MD = ROOT / "skills" / "startup-india-goat" / "SKILL.md"
 
 BIRD_STATUS_OFF = {
     "installed": False,

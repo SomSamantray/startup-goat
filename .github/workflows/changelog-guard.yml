@@ -91,7 +91,7 @@ jobs:
           VERSION_PATHS=(
             pyproject.toml
             uv.lock
-            skills/last30days/SKILL.md
+            skills/startup-india-goat/SKILL.md
             .claude-plugin/plugin.json
             .claude-plugin/marketplace.json
             .codex-plugin/plugin.json
@@ -138,7 +138,7 @@ jobs:
           touches_engine=0
           for path in "${CHANGED[@]}"; do
             case "${path}" in
-              skills/last30days/scripts/*|skills/last30days/SKILL.md|mcp/*)
+              skills/startup-india-goat/scripts/*|skills/startup-india-goat/SKILL.md|mcp/*)
                 touches_engine=1
                 ;;
             esac

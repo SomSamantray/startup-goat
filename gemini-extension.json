@@ -1,7 +1,7 @@
 {
-  "name": "last30days-skill",
+  "name": "startup-india-goat",
   "version": "3.21.0",
-  "description": "Research a topic from the last 30 days across Reddit, X, YouTube, TikTok, Instagram, Hacker News, Polymarket, and the web.",
+  "description": "Research Indian startups and startup groups from cited public and explicitly authorized sources.",
   "settings": [
     {
       "name": "Extension Directory",
@@ -11,7 +11,7 @@
     },
     {
       "name": "ScrapeCreators API Key",
-      "description": "ScrapeCreators API Key for Reddit, TikTok, and Instagram search (required)",
+      "description": "Optional provider key for configured social-source enrichment (never required for public-only research).",
       "envVar": "SCRAPECREATORS_API_KEY",
       "sensitive": true
     },
@@ -53,14 +53,32 @@
     },
     {
       "name": "Twitter AUTH_TOKEN",
-      "description": "Twitter browser AUTH_TOKEN cookie for direct X search (optional)",
+      "description": "Optional X browser AUTH_TOKEN cookie (use only with CT0 and explicit consent).",
       "envVar": "AUTH_TOKEN",
       "sensitive": true
     },
     {
       "name": "Twitter CT0",
-      "description": "Twitter browser CT0 cookie (optional, pair with AUTH_TOKEN)",
+      "description": "Optional X browser CT0 cookie (pair with AUTH_TOKEN).",
       "envVar": "CT0",
+      "sensitive": true
+    },
+    {
+      "name": "Startup GOAT memory directory",
+      "description": "Directory for Markdown, HTML, JSON, evidence, and manifest artifacts.",
+      "envVar": "STARTUP_GOAT_MEMORY_DIR",
+      "sensitive": false
+    },
+    {
+      "name": "LinkedIn access token",
+      "description": "Explicitly supplied LinkedIn token for permitted company research (optional).",
+      "envVar": "LINKEDIN_ACCESS_TOKEN",
+      "sensitive": true
+    },
+    {
+      "name": "Tracxn access token",
+      "description": "Explicitly supplied Tracxn token for permitted research (optional).",
+      "envVar": "TRACXN_ACCESS_TOKEN",
       "sensitive": true
     }
   ]

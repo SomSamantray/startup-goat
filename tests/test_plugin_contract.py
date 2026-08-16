@@ -6,7 +6,7 @@ from pathlib import Path
 from lib.skill_meta import read_skill_version
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL_ROOT = ROOT / "skills" / "last30days"
+SKILL_ROOT = ROOT / "skills" / "startup-india-goat"
 
 
 def _json(path: Path) -> dict:
@@ -24,22 +24,22 @@ class TestPluginContract(unittest.TestCase):
     def test_codex_plugin_manifest_uses_repo_skill_root(self) -> None:
         manifest = _json(ROOT / ".codex-plugin" / "plugin.json")
 
-        self.assertEqual("last30days", manifest["name"])
+        self.assertEqual("startup-india-goat", manifest["name"])
         self.assertEqual("./skills/", manifest["skills"])
-        self.assertEqual("last30days", manifest["interface"]["displayName"])
+        self.assertEqual("startup-india-goat", manifest["interface"]["displayName"])
 
     def test_codex_marketplace_points_at_repo_root_plugin(self) -> None:
         marketplace = _json(ROOT / ".agents" / "plugins" / "marketplace.json")
         plugins = marketplace.get("plugins") or []
         plugin_by_name = {plugin["name"]: plugin for plugin in plugins}
 
-        self.assertEqual("last30days-skill", marketplace["name"])
-        self.assertIn("last30days", plugin_by_name)
-        plugin = plugin_by_name["last30days"]
+        self.assertEqual("startup-india-goat-skill", marketplace["name"])
+        self.assertIn("startup-india-goat", plugin_by_name)
+        plugin = plugin_by_name["startup-india-goat"]
         self.assertEqual(
             {
                 "source": "url",
-                "url": "https://github.com/mvanhorn/last30days-skill.git",
+                "url": "https://github.com/mvanhorn/startup-india-goat-skill.git",
             },
             plugin["source"],
         )
@@ -47,7 +47,7 @@ class TestPluginContract(unittest.TestCase):
     def test_grok_plugin_manifest_uses_repo_skill_root(self) -> None:
         manifest = _json(ROOT / ".grok-plugin" / "plugin.json")
 
-        self.assertEqual("last30days", manifest["name"])
+        self.assertEqual("startup-india-goat", manifest["name"])
         self.assertEqual("./skills/", manifest["skills"])
 
     def test_grok_marketplace_points_at_repo_root_plugin(self) -> None:
@@ -55,14 +55,14 @@ class TestPluginContract(unittest.TestCase):
         plugins = marketplace.get("plugins") or []
         plugin_by_name = {plugin["name"]: plugin for plugin in plugins}
 
-        self.assertEqual("last30days-skill", marketplace["name"])
-        self.assertIn("last30days", plugin_by_name)
-        plugin = plugin_by_name["last30days"]
+        self.assertEqual("startup-india-goat-skill", marketplace["name"])
+        self.assertIn("startup-india-goat", plugin_by_name)
+        plugin = plugin_by_name["startup-india-goat"]
         # Exact dict equality locks the bare Git URL source (anti-self-referential-local).
         self.assertEqual(
             {
                 "source": "url",
-                "url": "https://github.com/mvanhorn/last30days-skill.git",
+                "url": "https://github.com/mvanhorn/startup-india-goat-skill.git",
             },
             plugin["source"],
         )
@@ -108,10 +108,10 @@ class TestPluginContract(unittest.TestCase):
     def test_workflows_do_not_reference_removed_root_scripts_dir(self) -> None:
         # The historical root-level scripts/ directory was removed; workflows must not
         # reference a bare `scripts/` path. Allowed replacements:
-        # skills/last30days/scripts/ (engine), mcp/scripts/ (.mcpb), .github/scripts/
+        # skills/startup-india-goat/scripts/ (engine), mcp/scripts/ (.mcpb), .github/scripts/
         # (release automation).
         allowed_prefixes = (
-            "skills/last30days/scripts/",
+            "skills/startup-india-goat/scripts/",
             "mcp/scripts/",
             ".github/scripts/",
         )

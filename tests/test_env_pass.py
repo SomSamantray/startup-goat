@@ -22,7 +22,7 @@ import pytest
 
 from lib import env
 
-SETUP_PASS_SH = Path(__file__).resolve().parents[1] / "skills" / "last30days" / "scripts" / "setup-pass.sh"
+SETUP_PASS_SH = Path(__file__).resolve().parents[1] / "skills" / "startup-india-goat" / "scripts" / "setup-pass.sh"
 
 # ---------------------------------------------------------------------------
 # _load_pass unit tests

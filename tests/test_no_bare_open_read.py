@@ -6,7 +6,7 @@ import ast
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-LAST30DAYS = ROOT / "skills" / "last30days" / "scripts" / "last30days.py"
+LAST30DAYS = ROOT / "skills" / "startup-india-goat" / "scripts" / "last30days.py"
 
 
 class BareOpenReadFinder(ast.NodeVisitor):

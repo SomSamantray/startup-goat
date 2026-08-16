@@ -35,7 +35,7 @@ from . import health
 
 # Direct engine invocation prefix (scripting fallback; the slash-command UX
 # is "ask the agent to run setup ...", which is the natural-language form).
-ENGINE_CLI = "python3 skills/last30days/scripts/last30days.py"
+ENGINE_CLI = "python3 skills/startup-india-goat/scripts/last30days.py"
 SETUP_BROWSER_COOKIES_CLI = f"{ENGINE_CLI} setup --allow-browser-cookies"
 SETUP_GITHUB_CLI = f"{ENGINE_CLI} setup --github"
 

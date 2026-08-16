@@ -85,7 +85,7 @@ def test_changelog_fragments_exist_and_changelog_is_untouched():
 # --- SKILL.md unlock surfaces ---------------------------------------------
 
 def _skill_md():
-    return (REPO / "skills" / "last30days" / "SKILL.md").read_text()
+    return (REPO / "skills" / "startup-india-goat" / "SKILL.md").read_text()
 
 
 def test_skill_md_does_not_check_grok_first():

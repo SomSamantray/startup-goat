@@ -197,7 +197,7 @@ class TestChangelogWorkflow(unittest.TestCase):
             "3.18.1",
         )
         self.assertEqual(
-            mod.version_from("skills/last30days/SKILL.md", 'version: "3.18.1"\n'),
+            mod.version_from("skills/startup-india-goat/SKILL.md", 'version: "3.18.1"\n'),
             "3.18.1",
         )
         self.assertEqual(
@@ -259,7 +259,7 @@ class TestChangelogWorkflow(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             # Minimal fixtures mirroring the lockstep layout.
-            (tmp_path / "skills" / "last30days").mkdir(parents=True)
+            (tmp_path / "skills" / "startup-india-goat").mkdir(parents=True)
             (tmp_path / ".claude-plugin").mkdir()
             (tmp_path / ".codex-plugin").mkdir()
             (tmp_path / ".grok-plugin").mkdir()
@@ -268,7 +268,7 @@ class TestChangelogWorkflow(unittest.TestCase):
                 '[project]\nname = "last30days-skill"\nversion = "3.18.1"\n',
                 encoding="utf-8",
             )
-            (tmp_path / "skills" / "last30days" / "SKILL.md").write_text(
+            (tmp_path / "skills" / "startup-india-goat" / "SKILL.md").write_text(
                 '---\nversion: "3.18.1"\n---\n\n# last30days v3.18.1: Title\n',
                 encoding="utf-8",
             )
@@ -306,7 +306,7 @@ class TestChangelogWorkflow(unittest.TestCase):
 
             # Point module paths at the temp tree.
             mod.ROOT = tmp_path
-            mod.SKILL_MD = tmp_path / "skills" / "last30days" / "SKILL.md"
+            mod.SKILL_MD = tmp_path / "skills" / "startup-india-goat" / "SKILL.md"
             mod.PYPROJECT = tmp_path / "pyproject.toml"
             mod.UV_LOCK = tmp_path / "uv.lock"
             mod.JSON_VERSION_FILES = (
@@ -326,7 +326,7 @@ class TestChangelogWorkflow(unittest.TestCase):
             pyproject = (tmp_path / "pyproject.toml").read_text(encoding="utf-8")
             self.assertIn('version = "9.9.9"', pyproject)
 
-            skill = (tmp_path / "skills" / "last30days" / "SKILL.md").read_text(
+            skill = (tmp_path / "skills" / "startup-india-goat" / "SKILL.md").read_text(
                 encoding="utf-8"
             )
             self.assertIn('version: "9.9.9"', skill)

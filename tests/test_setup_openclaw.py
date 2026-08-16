@@ -78,7 +78,7 @@ class TestRunOpenclawSetup:
 
     def test_openclaw_metadata_keeps_scrapecreators_optional(self):
         """OpenClaw metadata should not hard-require the ScrapeCreators key."""
-        skill_md = Path(__file__).parent.parent / "skills" / "last30days" / "SKILL.md"
+        skill_md = Path(__file__).parent.parent / "skills" / "startup-india-goat" / "SKILL.md"
         text = skill_md.read_text(encoding="utf-8")
         assert "SCRAPECREATORS_API_KEY" in text
         expected = (

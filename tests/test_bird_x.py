@@ -10,7 +10,7 @@ from unittest import mock
 from lib.bird_x import parse_bird_response
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-VENDORED_BIRD = REPO_ROOT / "skills" / "last30days" / "scripts" / "lib" / "vendor" / "bird-search" / "bird-search.mjs"
+VENDORED_BIRD = REPO_ROOT / "skills" / "startup-india-goat" / "scripts" / "lib" / "vendor" / "bird-search" / "bird-search.mjs"
 
 
 class TestBirdXEngagementZero(unittest.TestCase):
@@ -128,7 +128,7 @@ class TestVendoredBirdRuntime(unittest.TestCase):
                           extractCookiesFromSafari,
                           extractCookiesFromChrome,
                           extractCookiesFromFirefox,
-                        } from "./skills/last30days/scripts/lib/vendor/bird-search/lib/cookies.js";
+                        } from "./skills/startup-india-goat/scripts/lib/vendor/bird-search/lib/cookies.js";
 
                         const payload = await Promise.all([
                           extractCookiesFromSafari(),

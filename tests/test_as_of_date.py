@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "skills" / "last30days" / "scripts"))
+sys.path.insert(0, str(REPO_ROOT / "skills" / "startup-india-goat" / "scripts"))
 
 import last30days as cli
 from lib import dates
@@ -47,7 +47,7 @@ class AsOfDateTests(unittest.TestCase):
         result = subprocess.run(
     [
         sys.executable,
-        "skills/last30days/scripts/last30days.py",
+        "skills/startup-india-goat/scripts/last30days.py",
         "OpenAI",
         "--mock",
         "--emit=json",
@@ -75,7 +75,7 @@ class AsOfDateTests(unittest.TestCase):
         result = subprocess.run(
             [
                 sys.executable,
-                "skills/last30days/scripts/last30days.py",
+                "skills/startup-india-goat/scripts/last30days.py",
                 "OpenAI",
                 "--mock",
                 "--emit=json",

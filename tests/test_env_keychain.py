@@ -19,7 +19,7 @@ import pytest
 
 from lib import env
 
-SETUP_KEYCHAIN_SH = Path(__file__).resolve().parents[1] / "skills" / "last30days" / "scripts" / "setup-keychain.sh"
+SETUP_KEYCHAIN_SH = Path(__file__).resolve().parents[1] / "skills" / "startup-india-goat" / "scripts" / "setup-keychain.sh"
 
 # ---------------------------------------------------------------------------
 # _load_keychain unit tests

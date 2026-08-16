@@ -442,7 +442,7 @@ def test_discovery_cli_json_contract_and_mutual_exclusion():
     result = subprocess.run(
         [
             sys.executable,
-            "skills/last30days/scripts/last30days.py",
+            "skills/startup-india-goat/scripts/last30days.py",
             "--discover",
             "AI agents",
             "--mock",
@@ -470,7 +470,7 @@ def test_discovery_cli_json_contract_and_mutual_exclusion():
     invalid = subprocess.run(
         [
             sys.executable,
-            "skills/last30days/scripts/last30days.py",
+            "skills/startup-india-goat/scripts/last30days.py",
             "topic",
             "--discover",
             "AI agents",
@@ -487,7 +487,7 @@ def test_discovery_cli_json_contract_and_mutual_exclusion():
     drill_conflict = subprocess.run(
         [
             sys.executable,
-            "skills/last30days/scripts/last30days.py",
+            "skills/startup-india-goat/scripts/last30days.py",
             "--discover",
             "AI agents",
             "--drill",
@@ -583,7 +583,7 @@ def test_discovery_cli_mock_render_has_no_angle_or_pipeline_lines():
         return subprocess.run(
             [
                 sys.executable,
-                "skills/last30days/scripts/last30days.py",
+                "skills/startup-india-goat/scripts/last30days.py",
                 "--discover",
                 "AI agents",
                 "--mock",
@@ -608,7 +608,7 @@ def test_discovery_cli_bare_discover_is_global_trending():
     result = subprocess.run(
         [
             sys.executable,
-            "skills/last30days/scripts/last30days.py",
+            "skills/startup-india-goat/scripts/last30days.py",
             "--discover",
             "--mock",
             "--emit=json",
@@ -630,7 +630,7 @@ def test_discovery_cli_shallow_skips_enrichment():
     result = subprocess.run(
         [
             sys.executable,
-            "skills/last30days/scripts/last30days.py",
+            "skills/startup-india-goat/scripts/last30days.py",
             "--discover", "AI agents",
             "--discover-shallow",
             "--mock",
@@ -655,7 +655,7 @@ def test_discovery_cli_rejects_shallow_without_discover():
     result = subprocess.run(
         [
             sys.executable,
-            "skills/last30days/scripts/last30days.py",
+            "skills/startup-india-goat/scripts/last30days.py",
             "AI agents",
             "--discover-shallow",
             "--mock",
@@ -673,7 +673,7 @@ def test_discovery_cli_rejects_historical_as_of():
     result = subprocess.run(
         [
             sys.executable,
-            "skills/last30days/scripts/last30days.py",
+            "skills/startup-india-goat/scripts/last30days.py",
             "--discover",
             "AI agents",
             "--as-of",
@@ -695,7 +695,7 @@ def test_discovery_filters_incompatible_default_sources_but_rejects_explicit_onl
     default_result = subprocess.run(
         [
             sys.executable,
-            "skills/last30days/scripts/last30days.py",
+            "skills/startup-india-goat/scripts/last30days.py",
             "--discover",
             "AI agents",
             "--mock",
@@ -712,7 +712,7 @@ def test_discovery_filters_incompatible_default_sources_but_rejects_explicit_onl
     explicit_result = subprocess.run(
         [
             sys.executable,
-            "skills/last30days/scripts/last30days.py",
+            "skills/startup-india-goat/scripts/last30days.py",
             "--discover",
             "AI agents",
             "--search=youtube",
@@ -1082,7 +1082,7 @@ def test_discovery_mock_run_writes_no_research_db(tmp_path):
     result = subprocess.run(
         [
             sys.executable,
-            "skills/last30days/scripts/last30days.py",
+            "skills/startup-india-goat/scripts/last30days.py",
             "--discover",
             "AI agents",
             "--mock",
@@ -1198,7 +1198,7 @@ def test_queue_cover_cli_unknown_name_subprocess_exit_code(tmp_path):
     result = subprocess.run(
         [
             sys.executable,
-            "skills/last30days/scripts/last30days.py",
+            "skills/startup-india-goat/scripts/last30days.py",
             "queue",
             "cover",
             "No Such Topic",
@@ -1236,7 +1236,7 @@ def test_discovery_exits_when_configured_sources_have_no_discovery_feed(monkeypa
 def _run_protocol_cli(argv: list[str], env_overrides: dict[str, str] | None = None):
     """Run the real CLI entry point; env overrides layer onto the test env."""
     return subprocess.run(
-        [sys.executable, "skills/last30days/scripts/last30days.py", *argv],
+        [sys.executable, "skills/startup-india-goat/scripts/last30days.py", *argv],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -2629,7 +2629,7 @@ def test_no_engine_judge_references_remain_anywhere():
     skills/ or tests/ references it by name."""
     needle = "discovery" + "_judge"  # split so this pin never matches itself
     assert not (
-        REPO_ROOT / "skills" / "last30days" / "scripts" / "lib" / f"{needle}.py"
+        REPO_ROOT / "skills" / "startup-india-goat" / "scripts" / "lib" / f"{needle}.py"
     ).exists()
     offenders = [
         str(path)

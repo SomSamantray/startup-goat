@@ -54,7 +54,7 @@ class CliV3Tests(unittest.TestCase):
 
     def test_mock_json_cli(self):
         result = subprocess.run(
-            [sys.executable, "skills/last30days/scripts/last30days.py", "test topic", "--mock", "--emit=json"],
+            [sys.executable, "skills/startup-india-goat/scripts/last30days.py", "test topic", "--mock", "--emit=json"],
             cwd=REPO_ROOT,
             capture_output=True,
             text=True,
@@ -75,7 +75,7 @@ class CliV3Tests(unittest.TestCase):
         result = subprocess.run(
             [
                 sys.executable,
-                "skills/last30days/scripts/last30days.py",
+                "skills/startup-india-goat/scripts/last30days.py",
                 "test topic",
                 "--mock",
                 "--emit=json",
@@ -95,7 +95,7 @@ class CliV3Tests(unittest.TestCase):
         result = subprocess.run(
             [
                 sys.executable,
-                "skills/last30days/scripts/last30days.py",
+                "skills/startup-india-goat/scripts/last30days.py",
                 "test topic",
                 "--mock",
                 "--emit=json",
@@ -358,7 +358,7 @@ class CliV3Tests(unittest.TestCase):
             result = subprocess.run(
                 [
                     sys.executable,
-                    "skills/last30days/scripts/last30days.py",
+                    "skills/startup-india-goat/scripts/last30days.py",
                     "compact save probe",
                     "--mock",
                     "--emit=compact",

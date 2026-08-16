@@ -80,6 +80,24 @@ Identity in the queue is annotate-only: a new topic name that closely matches an
 
 The user-set status on a Topic queue row meaning "I already produced content for this story." Set by marking a topic covered by its exact name; surfaced is the only other status. A resurfacing never un-covers a row, and a new name that fuzzily matches a Covered row is born Covered - so the mark survives the judge (now the hosting model) renaming the same story across runs instead of silently re-pitching it.
 
+## Startup India GOAT
+
+### Startup identity
+
+The evidence-backed canonical representation of one startup across brand names, legal names, domains, handles, tickers, exchange identifiers, and DPIIT identifiers. Identity confidence is separate from evidence relevance so an on-topic result cannot silently attach to the wrong company.
+
+### Evidence ledger
+
+The durable record joining a report claim or structured fact to its source item, canonical URL, dates, retrieval time, access mode, confidence, and conflict group. The ledger is the audit surface behind Markdown, HTML, and agent JSON outputs.
+
+### Research contract
+
+The pre-retrieval summary of entities, aliases, dimensions, time horizon, source set, access requirements, expected gaps, and output artifacts that the Startup India GOAT Skill shows before it begins collection.
+
+### GOAT rubric
+
+A qualitative comparison rubric for product/problem, market, traction, capital, team, distribution/defensibility, business model, Indian ecosystem relevance, evidence quality, and risks. It reports dimension-level strengths, weaknesses, and uncertainty rather than an unsupported composite score.
+
 ## Flagged ambiguities
 
 - "Enrichment" is used for two distinct things: Comment-enrichment slots (fetching comments for already-ranked Reddit posts in the Keyless path) and Discovery's Enrichment pass (a full research run per Nomination). Context disambiguates; prefer the full term when writing.

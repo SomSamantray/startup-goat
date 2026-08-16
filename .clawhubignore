@@ -15,7 +15,7 @@ __pycache__/
 *.png
 *.gif
 assets/
-skills/last30days/assets/
+skills/startup-india-goat/assets/
 .DS_Store
 .coverage
 htmlcov/
@@ -55,17 +55,17 @@ SPEC.md
 TASKS.md
 
 # Dev/eval scripts shipped inside the skill tree but not needed at runtime
-skills/last30days/scripts/build-skill.sh
-skills/last30days/scripts/compare.sh
-skills/last30days/scripts/evaluate_search_quality.py
-skills/last30days/scripts/setup-keychain.sh
-skills/last30days/scripts/setup-pass.sh
-skills/last30days/scripts/test_device_auth.py
-skills/last30days/scripts/test-v1-vs-v2.sh
-skills/last30days/scripts/verify_v3.py
+skills/startup-india-goat/scripts/build-skill.sh
+skills/startup-india-goat/scripts/compare.sh
+skills/startup-india-goat/scripts/evaluate_search_quality.py
+skills/startup-india-goat/scripts/setup-keychain.sh
+skills/startup-india-goat/scripts/setup-pass.sh
+skills/startup-india-goat/scripts/test_device_auth.py
+skills/startup-india-goat/scripts/test-v1-vs-v2.sh
+skills/startup-india-goat/scripts/verify_v3.py
 
 # Keep visible: optional runtime watchlist/store/briefing feature scripts
 # (`watchlist.py`, `store.py`, and `briefing.py`).
 
 # Vendored third-party X-search client (node_modules analog); excluded from scan, still installed.
-skills/last30days/scripts/lib/vendor/
+skills/startup-india-goat/scripts/lib/vendor/

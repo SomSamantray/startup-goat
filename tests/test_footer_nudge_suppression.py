@@ -13,7 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _engine() -> Path:
-    return REPO_ROOT / "skills" / "last30days" / "scripts" / "last30days.py"
+    return REPO_ROOT / "skills" / "startup-india-goat" / "scripts" / "last30days.py"
 
 
 class FooterNudgeSuppressionTests(unittest.TestCase):

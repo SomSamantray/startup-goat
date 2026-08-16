@@ -3,8 +3,8 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL_MD = ROOT / "skills" / "last30days" / "SKILL.md"
-SAVE_HTML = ROOT / "skills" / "last30days" / "references" / "save-html-brief.md"
+SKILL_MD = ROOT / "skills" / "startup-india-goat" / "SKILL.md"
+SAVE_HTML = ROOT / "skills" / "startup-india-goat" / "references" / "save-html-brief.md"
 
 
 def test_skill_routes_html_to_reference_and_artifact_handoff():

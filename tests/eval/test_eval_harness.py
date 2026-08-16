@@ -142,7 +142,7 @@ def test_coherence_allows_singletons_for_sparse_fixtures():
 
 def test_enrichment_replay_merges_metadata_without_replacing_items():
     import sys
-    sys.path.insert(0, "skills/last30days/scripts")
+    sys.path.insert(0, "skills/startup-india-goat/scripts")
     from lib import pipeline, schema
 
     fresh = schema.SourceItem(
@@ -171,7 +171,7 @@ def test_enrichment_replay_merges_metadata_without_replacing_items():
 
 def test_star_enrichment_apply_map_offline():
     import sys
-    sys.path.insert(0, "skills/last30days/scripts")
+    sys.path.insert(0, "skills/startup-india-goat/scripts")
     from lib import github, schema
 
     candidate = schema.Candidate(

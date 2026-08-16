@@ -9,7 +9,7 @@ from pathlib import Path
 from lib import setup_wizard
 
 ROOT = Path(__file__).resolve().parents[1]
-ENGINE = ROOT / "skills" / "last30days" / "scripts" / "last30days.py"
+ENGINE = ROOT / "skills" / "startup-india-goat" / "scripts" / "last30days.py"
 
 
 class TestWelcome(unittest.TestCase):

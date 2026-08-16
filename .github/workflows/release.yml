@@ -39,19 +39,19 @@ jobs:
 
       - name: Build .skill artifact
         run: |
-          bash skills/last30days/scripts/build-skill.sh
-          test -f dist/last30days.skill
+          bash skills/startup-india-goat/scripts/build-skill.sh
+          test -f dist/startup-india-goat.skill
 
       - name: Attest .skill artifact provenance
         uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0
         with:
-          subject-path: dist/last30days.skill
+          subject-path: dist/startup-india-goat.skill
 
       - name: Upload skill artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: last30days-skill
-          path: dist/last30days.skill
+          name: startup-india-goat-skill
+          path: dist/startup-india-goat.skill
 
   # Cross-compile the Go MCP server for each Claude Desktop platform and
   # package each as a .mcpb. MCPB v0.3 is a ZIP containing the checked-in
@@ -170,7 +170,7 @@ jobs:
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
         run: |
           gh release create "${RELEASE_TAG}" \
-            dist/last30days.skill \
+            dist/startup-india-goat.skill \
             dist/last30days-pp-mcp-*.mcpb \
             --generate-notes \
             --verify-tag

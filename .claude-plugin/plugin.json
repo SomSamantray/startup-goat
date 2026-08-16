@@ -1,30 +1,23 @@
 {
-  "name": "last30days",
+  "name": "startup-india-goat",
   "version": "3.21.0",
-  "description": "Research any topic across Reddit, X, YouTube, TikTok, Instagram, Hacker News, Polymarket, GitHub, and 5+ more sources. AI agent scores by upvotes, likes, and real money - not editors.",
+  "description": "Evidence-backed research on Indian startups across public and explicitly authorized sources, with cited profiles, comparisons, and saved artifacts.",
   "author": {
     "name": "Matt Van Horn",
     "email": "mvanhorn@gmail.com",
     "url": "https://github.com/mvanhorn"
   },
-  "homepage": "https://github.com/mvanhorn/last30days-skill",
-  "repository": "https://github.com/mvanhorn/last30days-skill",
+  "homepage": "https://github.com/mvanhorn/startup-india-goat-skill",
+  "repository": "https://github.com/mvanhorn/startup-india-goat-skill",
   "license": "MIT",
   "keywords": [
-    "competitor research",
-    "research",
-    "reddit",
-    "twitter",
-    "youtube",
-    "tiktok",
-    "instagram",
-    "trends",
-    "prompts",
-    "polymarket",
-    "github",
-    "perplexity",
-    "threads",
-    "pinterest",
-    "hacker-news"
+    "startup research",
+    "startup india",
+    "company research",
+    "funding",
+    "due diligence",
+    "india",
+    "evidence",
+    "comparison"
   ]
 }

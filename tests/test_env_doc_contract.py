@@ -9,7 +9,7 @@ from lib import env
 
 ROOT = Path(__file__).resolve().parents[1]
 DOC_PATHS = [
-    ROOT / "skills" / "last30days" / "SKILL.md",
+    ROOT / "skills" / "startup-india-goat" / "SKILL.md",
     ROOT / "README.md",
 ]
 CONFIG_ENV_KEY_RE = re.compile(

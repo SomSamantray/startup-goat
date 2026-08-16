@@ -12,7 +12,7 @@ from typing import Any
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
-SCRIPTS = ROOT / "skills" / "last30days" / "scripts"
+SCRIPTS = ROOT / "skills" / "startup-india-goat" / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 

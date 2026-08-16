@@ -1,7 +1,7 @@
 [project]
-name = "last30days-skill"
+name = "startup-india-goat-skill"
 version = "3.21.0"
-description = "Multi-source last-30-days research skill"
+description = "Evidence-backed research skill for Indian startups and startup groups"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
@@ -15,13 +15,13 @@ dev = [
 ]
 
 [tool.towncrier]
-name = "last30days-skill"
+name = "startup-india-goat-skill"
 directory = "changelog.d"
 filename = "CHANGELOG.md"
 start_string = "<!-- towncrier release notes start -->\n"
 underlines = ["", "", ""]
 title_format = "## [{version}] - {project_date}"
-issue_format = "[#{issue}](https://github.com/mvanhorn/last30days-skill/issues/{issue})"
+issue_format = "[#{issue}](https://github.com/mvanhorn/startup-india-goat-skill/issues/{issue})"
 
 [[tool.towncrier.type]]
 directory = "security"
@@ -63,9 +63,9 @@ addopts = [
 
 [tool.coverage.run]
 branch = true
-source = ["skills/last30days/scripts", "tests"]
+source = ["skills/startup-india-goat/scripts", "tests"]
 omit = [
-  "skills/last30days/scripts/lib/vendor/*",
+  "skills/startup-india-goat/scripts/lib/vendor/*",
   "dist/*",
 ]
 
@@ -78,6 +78,6 @@ show_missing = true
 # Do not lower without documenting why in the PR (see AGENTS.md Rules).
 fail_under = 84
 omit = [
-  "skills/last30days/scripts/lib/vendor/*",
+  "skills/startup-india-goat/scripts/lib/vendor/*",
   "dist/*",
 ]

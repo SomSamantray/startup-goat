@@ -5,7 +5,7 @@ set -euo pipefail
 # Runs all 17 test queries through both v1 and v2 SKILL.md
 # using `claude --print` to capture real end-to-end output.
 
-SKILL_DIR="$HOME/.claude/skills/last30days"
+SKILL_DIR="$HOME/.claude/skills/startup-india-goat"
 REPO_DIR="${REPO_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 CLAUDE="${CLAUDE:-$(command -v claude || echo claude)}"
 

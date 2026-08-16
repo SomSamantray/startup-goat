@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "skills" / "last30days" / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "skills" / "startup-india-goat" / "scripts"))
 
 
 @pytest.fixture(autouse=True)

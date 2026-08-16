@@ -1,4 +1,4 @@
-# Hermes scan baseline — skills/last30days/ (real skills_guard.py, community source)
+# Hermes scan baseline — skills/startup-india-goat/ (real skills_guard.py, community source)
 
 Measured 2026-07-06 against `fix/hermes-scan-safe-verdict` (off origin/main @ 3.11.0).
 Verdict: **dangerous** — BLOCKED (community + dangerous; --force powerless).

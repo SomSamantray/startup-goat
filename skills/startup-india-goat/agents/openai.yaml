@@ -1,0 +1,8 @@
+interface:
+  display_name: "Startup India GOAT"
+  short_description: "Research Indian startups and startup groups with cited evidence, source coverage, and saved artifacts."
+  default_prompt: "Research this Indian startup or startup group, show the pre-retrieval contract, cite every material claim, and save the report artifacts."
+  brand_color: "#138A72"
+
+policy:
+  allow_implicit_invocation: true

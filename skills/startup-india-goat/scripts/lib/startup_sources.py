@@ -52,6 +52,31 @@ def _placeholder_factory() -> StartupAdapter:
     return UnimplementedStartupAdapter()
 
 
+def _yourstory_factory() -> StartupAdapter:
+    from .yourstory import YourStoryAdapter
+    return YourStoryAdapter()
+
+
+def _startup_india_factory() -> StartupAdapter:
+    from .startup_india import StartupIndiaAdapter
+    return StartupIndiaAdapter()
+
+
+def _screener_factory() -> StartupAdapter:
+    from .screener import ScreenerAdapter
+    return ScreenerAdapter()
+
+
+def _inc42_factory() -> StartupAdapter:
+    from .inc42 import Inc42Adapter
+    return Inc42Adapter()
+
+
+def _the_ken_factory() -> StartupAdapter:
+    from .the_ken import TheKenAdapter
+    return TheKenAdapter()
+
+
 @dataclass(frozen=True)
 class FetchBudget:
     """Hard upper bounds supplied to a source adapter."""
@@ -136,6 +161,7 @@ def _registration(
     source_tier: str = "secondary",
     required_context_keys: tuple[str, ...] = (),
     requires_consent: bool = False,
+    adapter_factory: AdapterFactory = _placeholder_factory,
 ) -> SourceCapability:
     return SourceCapability(
         canonical_name=name,
@@ -147,6 +173,7 @@ def _registration(
         requires_consent=requires_consent,
         required_context_keys=required_context_keys,
         source_tier=source_tier,
+        adapter_factory=adapter_factory,
     )
 
 
@@ -162,11 +189,11 @@ DEFAULT_SOURCE_REGISTRY: tuple[SourceCapability, ...] = (
         predicate=_has_linkedin_token, required_context_keys=("LINKEDIN_ACCESS_TOKEN",),
         requires_consent=True, source_tier="primary",
     ),
-    _registration("yourstory", ("yourstory", "your-story"), source_tier="secondary"),
-    _registration("screener", ("screener", "screener.in"), source_tier="authoritative"),
-    _registration("the-ken", ("the-ken", "the_ken", "the ken", "ken"), source_tier="secondary"),
-    _registration("inc42", ("inc42", "inc 42"), source_tier="secondary"),
-    _registration("startup-india", ("startup-india", "startup_india", "startup india", "dpiit"), source_tier="authoritative"),
+    _registration("yourstory", ("yourstory", "your-story"), source_tier="secondary", adapter_factory=_yourstory_factory),
+    _registration("screener", ("screener", "screener.in"), source_tier="authoritative", adapter_factory=_screener_factory),
+    _registration("the-ken", ("the-ken", "the_ken", "the ken", "ken"), source_tier="secondary", adapter_factory=_the_ken_factory),
+    _registration("inc42", ("inc42", "inc 42"), source_tier="secondary", adapter_factory=_inc42_factory),
+    _registration("startup-india", ("startup-india", "startup_india", "startup india", "dpiit"), source_tier="authoritative", adapter_factory=_startup_india_factory),
     _registration(
         "tracxn", ("tracxn",), source_class="authorized", predicate=_has_tracxn_access,
         requires_consent=True, source_tier="commercial",

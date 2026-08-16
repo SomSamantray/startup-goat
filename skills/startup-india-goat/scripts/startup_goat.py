@@ -63,7 +63,10 @@ def main(argv: list[str] | None = None) -> int:
             bundle = result.save(save_dir=args.save_dir, emit=args.emit or "md,html,json", private=args.private)
             print(json.dumps(bundle.to_dict(), ensure_ascii=False, indent=2))
         else:
-            print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+            # Keep direct CLI output on the secret-free versioned export path;
+            # raw source bodies belong only in sanitized saved evidence files.
+            from lib.startup_export import export_json
+            print(export_json(result), end="")
     except (ValueError, KeyError) as exc:
         parser.error(str(exc))
     return 0

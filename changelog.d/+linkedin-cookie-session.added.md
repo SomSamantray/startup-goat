@@ -1,0 +1,1 @@
+LinkedIn now supports a user-supplied cookie-session adapter for company profiles and page posts, in addition to the existing bearer-token and ScrapeCreators paths. Cookies are held in memory only, never persisted or echoed, and never forwarded across a redirect or proxy.

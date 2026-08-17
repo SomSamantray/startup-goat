@@ -170,6 +170,19 @@ class LinkedInCookieAdapter:
             ALLOWED_HOSTS,
         )
 
+    @staticmethod
+    def _build_opener() -> urllib.request.OpenerDirector:
+        """Build an opener with no env proxy and no redirect following.
+
+        Credentials must never traverse an env-configured proxy, and a
+        credentialed request must never follow a redirect (even same-origin).
+        """
+        class _NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, req, fp, code, msg, headers, newurl):
+                return None
+
+        return urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect)
+
     def _request(self, url: str, cookies: Mapping[str, str]) -> tuple[int, str, str]:
         headers = {
             "Accept": "text/html,application/xhtml+xml",
@@ -183,15 +196,7 @@ class LinkedInCookieAdapter:
                 raw = self.fetcher(url, headers)
             return _response_parts(raw, url)
 
-        class _NoRedirect(urllib.request.HTTPRedirectHandler):
-            def redirect_request(self, req, fp, code, msg, headers, newurl):
-                return None
-
-        # Credentials must never traverse an env-configured proxy, and the
-        # allowlisted hostname must not resolve to private address space.
-        opener = urllib.request.build_opener(
-            urllib.request.ProxyHandler({}), _NoRedirect
-        )
+        opener = self._build_opener()
         validate_resolved_host(urllib.parse.urlsplit(url).hostname or "")
         request = urllib.request.Request(url, headers=headers, method="GET")
         try:

@@ -79,7 +79,9 @@ Set a persistent artifact directory with `STARTUP_GOAT_MEMORY_DIR` (default: `~/
 
 ### Optional LinkedIn access
 
-Use only an approved LinkedIn API bearer token. Do **not** paste it into chat, commit it, put it in a command-line argument, or use browser cookies/session tokens.
+LinkedIn supports two authorized paths. Use an approved LinkedIn API bearer token, or a cookie-session adapter fed by your own logged-in LinkedIn session cookies. Either way, credentials are read from memory only for the run — do **not** paste them into chat, commit them, put them in a command-line argument, or persist them anywhere.
+
+**Bearer token path:**
 
 ```bash
 export LINKEDIN_ACCESS_TOKEN='paste-your-approved-token-in-your-shell'
@@ -90,6 +92,20 @@ unset LINKEDIN_ACCESS_TOKEN
 ```
 
 The token is read from memory for the authorized request and is not written to reports. If the token is rejected, the report records `auth-failed`; never work around LinkedIn permissions or replay private Voyager requests.
+
+**Cookie-session path (user-supplied session cookies):**
+
+```bash
+export LINKEDIN_LI_AT='your-li_at-session-cookie'
+export LINKEDIN_JSESSIONID='ajax:123456'   # optional but recommended
+export LINKEDIN_BCOOKIE='your-bcookie'     # optional but recommended
+python3 skills/startup-india-goat/scripts/startup_goat.py \
+  "Acme" --source linkedin --include-gated --consent \
+  --save-dir ./startup-reports --emit=all
+unset LINKEDIN_LI_AT LINKEDIN_JSESSIONID LINKEDIN_BCOOKIE
+```
+
+Cookies are assembled into a `Cookie` header in memory for the authorized request, are never persisted or echoed, and never traverse a proxy or a cross-origin redirect. To fetch a specific company page, supply the vanity slug as an entity handle (`linkedin.com/company/<slug>`); otherwise the adapter slugs the display name as a best-effort fallback and verifies the returned page name against the requested entity.
 
 ## Reports and artifacts
 

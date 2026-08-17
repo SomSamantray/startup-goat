@@ -254,14 +254,15 @@ Observed authorized page:
 Extraction contract:
 
 - Preferred production path is an explicitly supplied, short-lived, allowlisted bearer-token API integration if the user has supported LinkedIn permissions.
+- A user-supplied cookie-session adapter (`LINKEDIN_LI_AT` plus optional `LINKEDIN_JSESSIONID` / `LINKEDIN_BCOOKIE`) fetches the server-rendered company page with an in-memory `Cookie` header and extracts visible overview fields and page posts. It is implemented in `skills/startup-india-goat/scripts/lib/linkedin_cookie.py` and requires explicit user consent; cookies are never persisted, echoed, or forwarded across a redirect or proxy.
 - Browser-assisted collection is an alternative only through the allowlist-only `BrowserCaptureEnvelope` and explicit consent.
-- Do not replay captured Voyager requests, copy cookies, extract CSRF values, or persist query variables.
+- Do not replay captured Voyager requests, extract CSRF values, or persist query variables. Cookies are supplied explicitly by the user for their own session only — never harvested from a browser store, and never copied into artifacts, logs, or chat.
 - Do not treat a public page's visible fields as permission to fetch private posts, people, jobs, or analytics beyond the selected page.
 - Classify expired session, permission denial, login wall, rate limit, and provider drift separately from no-results.
 
 Remaining fixture work:
 
-- Capture sanitized visible company overview, one page post, one job, one event, login/permission failure, and schema-drift envelopes.
+- Capture sanitized visible company overview, one page post, login/permission failure (authwall/999/429), and schema-drift envelopes. Jobs and events are out of scope for the cookie-session adapter (deferred follow-up).
 - Validate the supported bearer-token endpoint and scopes before implementing token retrieval. The current browser observation alone does not establish a stable public API contract.
 
 ## Production-study exit gate

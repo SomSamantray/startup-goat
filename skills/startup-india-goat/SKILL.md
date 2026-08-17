@@ -20,6 +20,9 @@ metadata:
         - AUTH_TOKEN
         - CT0
         - LINKEDIN_ACCESS_TOKEN
+        - LINKEDIN_LI_AT
+        - LINKEDIN_JSESSIONID
+        - LINKEDIN_BCOOKIE
         - TRACXN_ACCESS_TOKEN
         - BRAVE_API_KEY
         - PARALLEL_API_KEY
@@ -65,7 +68,7 @@ Natural-language requests may select one company, a list, a category cohort, or 
 
 The copied engine's compatibility setup is opt-in: `setup --allow-browser-cookies` is required before any browser-cookie read, and unset means no browser-cookie reads. Do not read browser-cookie values, and never place them in artifacts. Codex ChatGPT auth is intentionally not used as an OpenAI fallback. `LAST30DAYS_TRUST_PROJECT_CONFIG=1` is required before trusting hidden project configuration. Endpoint destinations follow configured provider base URLs; do not read browser-cookie values.
 
-Public-only research is the default and may proceed without confirmation. Ask for explicit consent before reading browser cookies, using a gated browser session, or sending data to any paid or third-party provider. Use `AUTH_TOKEN` plus `CT0` only through the existing X integration. Use `LINKEDIN_ACCESS_TOKEN` or a user-authorized, allowlist-only browser capture for LinkedIn. Tracxn requires an explicitly authorized session or supported token.
+Public-only research is the default and may proceed without confirmation. Ask for explicit consent before reading browser cookies, using a gated browser session, or sending data to any paid or third-party provider. Use `AUTH_TOKEN` plus `CT0` only through the existing X integration. For LinkedIn, use `LINKEDIN_ACCESS_TOKEN` (bearer token), a user-supplied cookie-session adapter (`LINKEDIN_LI_AT` plus optional `LINKEDIN_JSESSIONID` and `LINKEDIN_BCOOKIE` — held in memory only, never pasted into chat or passed as CLI arguments), or a user-authorized, allowlist-only browser capture. Tracxn requires an explicitly authorized session or supported token.
 
 Never bypass authentication, paywalls, CAPTCHA, quotas, robots restrictions, or provider security controls. Never request or persist cookies, browser storage, Authorization headers, CSRF values, hidden fields, raw HTML, or private page text. If a source is unavailable, report its exact access state (`auth-failed`, `paywalled`, `captcha`, `rate-limited`, `quota-exhausted`, `browser-unavailable`, `schema-drift`, `timeout`, `unreachable`, `skipped-unconfigured`, or `no-results`). Unavailable does not mean no activity.
 

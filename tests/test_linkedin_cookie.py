@@ -164,16 +164,19 @@ class TestSlugify(unittest.TestCase):
 
 class TestNameMatch(unittest.TestCase):
     def test_exact_and_contained(self):
-        self.assertTrue(_name_matches("Inc42 Media", "Inc42 Media", "e"))
-        self.assertTrue(_name_matches("Inc42 Media", "what is Inc42 Media building", "e"))
+        self.assertTrue(_name_matches("Inc42 Media", "Inc42 Media"))
+        self.assertTrue(_name_matches("Inc42 Media", "what is Inc42 Media building"))
 
     def test_mismatch(self):
-        self.assertFalse(_name_matches("Some Other Company", "Inc42 Media", "e"))
+        self.assertFalse(_name_matches("Some Other Company", "Inc42 Media"))
 
     def test_single_word_fuzzy_allowed(self):
         # Single-word names fall back to exact comparison to avoid false hits.
-        self.assertFalse(_name_matches("Acme", "Apple", "e"))
-        self.assertTrue(_name_matches("Acme", "Acme", "e"))
+        self.assertFalse(_name_matches("Acme", "Apple"))
+        self.assertTrue(_name_matches("Acme", "Acme"))
+
+    def test_empty_query_accepts_page(self):
+        self.assertTrue(_name_matches("Acme", ""))
 
 
 class TestPostItems(unittest.TestCase):

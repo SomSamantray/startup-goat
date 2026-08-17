@@ -247,7 +247,7 @@ class LinkedInCookieAdapter:
             # Identity verification: a wrong slug can silently resolve to a
             # differently-named company, so compare against the requested
             # entity before emitting evidence.
-            if not _name_matches(name, query, entity_id):
+            if not _name_matches(name, query):
                 return AdapterResult([], outcome(self.source, "schema-drift", detail="LinkedIn company name does not match the requested entity", fix_hint="Provide the correct linkedin.com/company/<slug> handle for this entity."), {"entity_id": entity_id, "access_state": "unknown", "access_mode": "cookie-session"})
             fields = _extract_company_fields(text)
             selected = {
@@ -283,11 +283,10 @@ def _response_parts(raw: Any, fallback_url: str) -> tuple[int, str, str]:
     return int(getattr(raw, "status", 200)), str(getattr(raw, "text", getattr(raw, "body", ""))), str(getattr(raw, "url", fallback_url))
 
 
-def _name_matches(page_name: str, query: str, entity_id: str) -> bool:
+def _name_matches(page_name: str, query: str) -> bool:
     """Whether the extracted page name plausibly matches the requested entity."""
     if not query:
-        # A bare entity_id with no display name cannot be verified; accept the
-        # page on name presence alone.
+        # No display name to verify against; accept the page on name presence.
         return True
     page = re.sub(r"[^a-z0-9]+", " ", page_name.casefold()).strip()
     wanted = re.sub(r"[^a-z0-9]+", " ", query.casefold()).strip()

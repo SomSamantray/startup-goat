@@ -112,5 +112,116 @@ class TestUrlValidation(unittest.TestCase):
         self.assertEqual("https://www.linkedin.com/company/acme", url)
 
 
+class TestRedactionEncodedEchoes(unittest.TestCase):
+    def test_url_encoded_cookie_echo_redacted(self):
+        import urllib.parse
+
+        from lib.linkedin_cookie import _redact
+
+        encoded = urllib.parse.quote(COOKIES["li_at"], safe="")
+        text = f"session value {encoded} is live"
+        redacted = _redact(text, (COOKIES["li_at"],))
+        self.assertNotIn(encoded, redacted)
+        self.assertIn("<redacted>", redacted)
+
+    def test_html_entity_encoded_cookie_echo_redacted(self):
+        import html
+
+        from lib.linkedin_cookie import _redact
+
+        escaped = html.escape(COOKIES["li_at"])
+        text = f"token {escaped} in body"
+        redacted = _redact(text, (COOKIES["li_at"],))
+        self.assertNotIn(escaped, redacted)
+        self.assertIn("<redacted>", redacted)
+
+    def test_short_cookie_value_redacted(self):
+        from lib.linkedin_cookie import _redact
+
+        short = "abc12345"
+        text = f"leaked {short} here"
+        self.assertNotIn(short, _redact(text, (short,)))
+
+
+class TestRealOpenerPath(unittest.TestCase):
+    """Exercise the production urllib opener path (no injected fetcher)."""
+
+    @staticmethod
+    def _serve(handler):
+        import threading
+        from http.server import BaseHTTPRequestHandler, HTTPServer
+
+        class _Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                status, body = handler(self.path)
+                self.send_response(status)
+                self.send_header("Content-Type", "text/html")
+                self.end_headers()
+                self.wfile.write(body.encode("utf-8"))
+
+            def log_message(self, *args):
+                pass
+
+        server = HTTPServer(("127.0.0.1", 0), _Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        return server
+
+    def test_redirect_status_maps_to_schema_drift(self):
+        import io
+
+        from lib import linkedin_cookie as lc
+
+        server = self._serve(lambda path: (302, ""))
+        adapter = LinkedInCookieAdapter()
+        with mock.patch.object(urllib.request, "build_opener") as build, \
+                mock.patch.object(lc, "validate_resolved_host"):
+            opener = mock.MagicMock()
+            opener.open.side_effect = urllib.error.HTTPError(
+                "https://www.linkedin.com/company/acme", 302, "Found", {}, io.BytesIO(b"")
+            )
+            build.return_value = opener
+            result = adapter.fetch(entity_id="e1", query="Acme", slug="acme", cookies=COOKIES)
+        self.assertEqual("schema-drift", result.outcome.state)
+        self.assertIn("redirect", result.outcome.detail)
+        server.shutdown()
+
+    def test_http_500_maps_to_unreachable(self):
+        import io
+
+        from lib import linkedin_cookie as lc
+
+        server = self._serve(lambda path: (500, "<html><body>oops</body></html>"))
+        adapter = LinkedInCookieAdapter()
+        with mock.patch.object(urllib.request, "build_opener") as build, \
+                mock.patch.object(lc, "validate_resolved_host"):
+            opener = mock.MagicMock()
+            opener.open.side_effect = urllib.error.HTTPError(
+                "https://www.linkedin.com/company/acme", 500, "Internal", {}, io.BytesIO(b"<html><body>oops</body></html>")
+            )
+            build.return_value = opener
+            result = adapter.fetch(entity_id="e1", query="Acme", slug="acme", cookies=COOKIES)
+        self.assertEqual("unreachable", result.outcome.state)
+        server.shutdown()
+
+    def test_slow_drip_read_is_bounded(self):
+        from lib.linkedin_cookie import _read_bounded
+
+        class _SlowHandle:
+            def __init__(self):
+                self.calls = 0
+
+            def read(self, size):
+                self.calls += 1
+                if self.calls > 1000:
+                    return b""
+                return b"x" * 1024
+
+        body = _read_bounded(_SlowHandle(), timeout=0.05)
+        # The read stops once the deadline elapses; it never hangs.
+        self.assertLessEqual(len(body), 2_000_001)
+        self.assertTrue(isinstance(body, str))
+
+
 if __name__ == "__main__":
     unittest.main()

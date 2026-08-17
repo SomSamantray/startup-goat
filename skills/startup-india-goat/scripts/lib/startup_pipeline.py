@@ -17,6 +17,7 @@ from .schema import SourceItem, SourceOutcome
 from .startup_schema import StartupIdentity
 from .startup_public_base import AdapterResult, outcome
 from .env import read_secret_env
+from .linkedin_cookie import LinkedInCookieAdapter
 from .startup_sources import SourceCapability, resolve_source
 
 GENERIC_SOURCES = frozenset({"github", "reddit", "x", "youtube", "web"})
@@ -145,6 +146,17 @@ def _bind_adapter_items(result: AdapterResult, identity: StartupIdentity, source
     return items
 
 
+def _linkedin_slug(handles: list[str]) -> str | None:
+    """Return a LinkedIn company slug candidate from an identity's handles.
+
+    Handles are stored bare (normalized), so the origin (which network the
+    handle came from) is not recoverable here.  The adapter's ``_name_matches``
+    guard rejects a wrong-company page, so a non-LinkedIn first handle fails
+    closed as schema-drift rather than binding wrong evidence.
+    """
+    return handles[0] if handles else None
+
+
 def _run_source(identity: StartupIdentity, capability: SourceCapability, *, config: Mapping[str, Any],
                 public_only: bool, consent: bool, mock: bool, depth: str, budget: StartupBudgets,
                 adapter_kwargs: Mapping[str, Any]) -> tuple[list[SourceItem], SourceOutcome, str | None]:
@@ -189,6 +201,12 @@ def _run_source(identity: StartupIdentity, capability: SourceCapability, *, conf
         if mock and not any(key in adapter_kwargs for key in ("fetcher", "url", "browser_envelope", "envelope", "token_response", "token", "cookies")):
             return [], SourceOutcome(source=source, state="no-results", attempted=False, detail="mock startup adapter has no fixture"), None
         adapter = capability.adapter_factory()
+        # The factory dispatches on env credentials; an explicit cookies kwarg
+        # (from adapter_kwargs) must select the cookie adapter even when no
+        # LINKEDIN_LI_AT env var is set.
+        if source == "linkedin" and adapter_kwargs.get("cookies") and not isinstance(adapter, LinkedInCookieAdapter):
+            from .linkedin_cookie import LinkedInCookieAdapter as _CookieAdapter
+            adapter = _CookieAdapter()
         call_kwargs = dict(adapter_kwargs)
         if source == "screener" and identity.tickers:
             call_kwargs.setdefault("ticker", identity.tickers[0])
@@ -197,7 +215,7 @@ def _run_source(identity: StartupIdentity, capability: SourceCapability, *, conf
         if source == "linkedin" and identity.handles and "slug" not in call_kwargs:
             # A user-supplied linkedin.com/company/<slug> handle is the only
             # reliable slug source; display-name slugification is best-effort.
-            call_kwargs["slug"] = identity.handles[0]
+            call_kwargs["slug"] = _linkedin_slug(identity.handles)
         value = adapter.fetch(
             entity_id=identity.entity_id, query=identity.display_name,
             config=dict(config), timeout=budget.timeout_seconds, mock=mock, **call_kwargs,

@@ -124,6 +124,81 @@ def test_linkedin_handle_threaded_as_slug(monkeypatch):
     assert result.entities[0].outcomes["linkedin"].state == "ok"
 
 
+def test_linkedin_token_only_run_selects_token_adapter(monkeypatch):
+    """A LINKEDIN_ACCESS_TOKEN-only run must not be silently skipped: the
+    factory routes it to the OAuth adapter."""
+    from lib import startup_sources
+    from lib.linkedin_token import LinkedInTokenAdapter
+
+    seen = {}
+
+    def fake_fetch(self, *, entity_id, query, **kwargs):
+        seen["called"] = True
+        seen["token"] = kwargs.get("token")
+        from lib.startup_public_base import AdapterResult, item, outcome
+        ev = item("linkedin", entity_id, url="https://api.linkedin.com/v2/organizations/x",
+                  title="Acme", body="profile", claim_type="company-profile")
+        return AdapterResult([ev], outcome("linkedin", "ok", items=1), {"entity_id": entity_id})
+
+    monkeypatch.setattr(LinkedInTokenAdapter, "fetch", fake_fetch)
+    result = research(
+        {"query": "Acme", "companies": ["Acme"], "sources": ["linkedin"]},
+        public_only=False, consent=True,
+        adapter_kwargs={"token": "dummy-bearer"},
+    )
+    assert seen["called"] is True
+    assert result.entities[0].outcomes["linkedin"].state == "ok"
+
+
+def test_linkedin_env_cookie_run_activates_cookie_adapter(monkeypatch):
+    """The README-documented `export LINKEDIN_LI_AT` flow reaches the cookie
+    adapter via the env-presence capability signal."""
+    from lib.linkedin_cookie import LinkedInCookieAdapter
+
+    seen = {}
+
+    def fake_fetch(self, *, entity_id, query, **kwargs):
+        seen["called"] = True
+        from lib.startup_public_base import AdapterResult, item, outcome
+        ev = item("linkedin", entity_id, url="https://www.linkedin.com/company/acme",
+                  title="Acme", body="profile", claim_type="company-profile")
+        return AdapterResult([ev], outcome("linkedin", "ok", items=1), {"entity_id": entity_id})
+
+    monkeypatch.setattr(LinkedInCookieAdapter, "fetch", fake_fetch)
+    monkeypatch.setenv("LINKEDIN_LI_AT", "env-li-at")
+    result = research(
+        {"query": "Acme", "companies": ["Acme"], "sources": ["linkedin"]},
+        public_only=False, consent=True,
+    )
+    assert seen["called"] is True
+    assert result.entities[0].outcomes["linkedin"].state == "ok"
+
+
+def test_linkedin_posts_survive_pipeline_binding(monkeypatch):
+    """Post items emitted by the adapter are bound to the entity and reach the
+    result (regression: posts were dropped when entity_id was empty)."""
+    from lib.linkedin_cookie import LinkedInCookieAdapter
+
+    def fake_fetch(self, *, entity_id, query, **kwargs):
+        from lib.startup_public_base import AdapterResult, item, outcome
+        ev = item("linkedin", entity_id, url="https://www.linkedin.com/company/acme",
+                  title="Acme", body="profile", claim_type="company-profile")
+        post = item("linkedin", entity_id, url="", title="A post", body="post body",
+                    claim_type="post")
+        return AdapterResult([ev, post], outcome("linkedin", "ok", items=2), {"entity_id": entity_id})
+
+    monkeypatch.setattr(LinkedInCookieAdapter, "fetch", fake_fetch)
+    result = research(
+        {"query": "Acme", "companies": ["Acme"], "sources": ["linkedin"]},
+        public_only=False, consent=True,
+        adapter_kwargs={"cookies": {"li_at": "dummy-li-at"}},
+    )
+    items = result.entities[0].items
+    claim_types = {it.metadata.get("claim_type") for it in items}
+    assert "post" in claim_types
+    assert result.entities[0].outcomes["linkedin"].items_returned == 2
+
+
 def test_budget_validation_and_declarative_options():
     with pytest.raises(ValueError):
         parse_request("Acme", budgets={"max_entities": 0})

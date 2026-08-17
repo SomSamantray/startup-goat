@@ -38,10 +38,29 @@ _USER_AGENT = (
     "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 )
 def _redact(value: Any, secrets: tuple[str, ...]) -> str:
+    """Redact cookie values and cookie-shaped strings from provider text.
+
+    Values are replaced literally, then via URL- and HTML-entity-unescaped
+    variants so an encoded echo (``li_at%3DAQE%2F...`` or ``li_at&#61;...``)
+    cannot survive into evidence.
+    """
+    import html as _html
+    import urllib.parse as _urlparse
+
     text = str(value or "")
     for secret in secrets:
-        if secret:
-            text = text.replace(secret, "<redacted>")
+        if not secret:
+            continue
+        text = text.replace(secret, "<redacted>")
+        try:
+            unquoted = _urlparse.unquote(secret)
+            if unquoted != secret:
+                text = text.replace(unquoted, "<redacted>")
+        except Exception:
+            pass
+        text = text.replace(_html.escape(secret), "<redacted>")
+        text = text.replace(_html.escape(secret, quote=True), "<redacted>")
+    # Defensive sweep for name=value forms even when the value differs.
     return re.sub(_SECRET, "<redacted>", text)
 
 
@@ -102,24 +121,25 @@ def _extract_company_fields(text: str) -> dict[str, str]:
 
 
 _POST_BLOCK_RE = re.compile(
-    r"(?:feed-shared-update-v2|occludable-update|update-components-actor|artdeco-card)",
+    r"(?:feed-shared-update-v2|occludable-update)",
     re.I,
 )
 
 
-def _post_items(html_body: str, *, max_posts: int, secrets: tuple[str, ...]) -> list[Any]:
+def _post_items(html_body: str, *, entity_id: str, max_posts: int, secrets: tuple[str, ...]) -> list[Any]:
     """Parse bounded post items from the raw posts HTML, if present.
 
     Posts live in the server-rendered DOM only when the layout renders them
     (the live session showed page posts present); a lazy-loaded or client-only
     surface yields no items, never fabricated ones.  Extraction splits the
-    redacted body on the post-block elements and takes the visible text of
-    each block.
+    redacted body on the update-container elements only (never the right-rail
+    ``artdeco-card`` chrome) and binds each item to ``entity_id`` so the
+    pipeline does not discard it.
     """
     if not html_body or not _POST_BLOCK_RE.search(html_body):
         return []
     items: list[Any] = []
-    blocks = re.split(r"(?=<div[^>]*class=\"[^\"]*(?:feed-shared-update-v2|occludable-update|update-components-actor|artdeco-card)[^\"]*\")", html_body, flags=re.I)
+    blocks = re.split(r"(?=<div[^>]*class=\"[^\"]*(?:feed-shared-update-v2|occludable-update)[^\"]*\")", html_body, flags=re.I)
     for block in blocks[1:]:
         if len(items) >= max_posts:
             break
@@ -133,7 +153,7 @@ def _post_items(html_body: str, *, max_posts: int, secrets: tuple[str, ...]) -> 
             continue
         items.append(
             item(
-                LINKEDIN_SOURCE, "", url="", title=truncate_text(body[:80], 80),
+                LINKEDIN_SOURCE, entity_id, url="", title=truncate_text(body[:80], 80),
                 body=body, claim_type="post",
                 metadata={"access_state": "private-session", "access_mode": "cookie-session", "is_article": False},
             )
@@ -223,7 +243,7 @@ class LinkedInCookieAdapter:
         try:
             url = self._url(slug)
             status, body, final_url = self._request(url, credential)
-            if final_url and final_url != url:
+            if status in (301, 302, 303, 307, 308) or (final_url and final_url != url):
                 # A redirect — even same-origin — is treated as provider drift;
                 # no credentialed request follows a second hop.
                 return AdapterResult([], outcome(self.source, "schema-drift", detail="LinkedIn redirect rejected"), {"entity_id": entity_id, "access_state": "unknown", "access_mode": "cookie-session"})
@@ -240,7 +260,7 @@ class LinkedInCookieAdapter:
             text = document.text
             if not text.strip():
                 return AdapterResult([], outcome(self.source, "no-results", detail="LinkedIn company page returned no rendered text"), {"entity_id": entity_id, "access_state": "private-session", "access_mode": "cookie-session"})
-            name = document.title or ""
+            name = _redact(document.title or "", secrets)
             name = name.removesuffix(" | LinkedIn").removesuffix("| LinkedIn").strip()
             if not name or name in {"LinkedIn", "Page not found"}:
                 return AdapterResult([], outcome(self.source, "schema-drift", detail="LinkedIn company name is missing"), {"entity_id": entity_id, "access_state": "unknown", "access_mode": "cookie-session"})
@@ -257,10 +277,10 @@ class LinkedInCookieAdapter:
             }
             safe_fields = {key: _redact(value, secrets) if isinstance(value, str) else value for key, value in selected.items()}
             profile_body = "\n".join(f"{key}: {truncate_text(value, 800)}" for key, value in safe_fields.items())
-            evidence = item(self.source, entity_id, url=url, title=selected["name"], body=profile_body,
+            evidence = item(self.source, entity_id, url=url, title=safe_fields["name"], body=profile_body,
                             claim_type="company-profile",
                             metadata={"access_state": "private-session", "access_mode": "cookie-session", "linkedin_fields": list(selected)})
-            posts = _post_items(safe_body, max_posts=self.max_posts, secrets=secrets)
+            posts = _post_items(safe_body, entity_id=entity_id, max_posts=self.max_posts, secrets=secrets)
             return AdapterResult([evidence, *posts], outcome(self.source, "ok", items=1 + len(posts)),
                                  {"entity_id": entity_id, "access_state": "private-session", "access_mode": "cookie-session", "posts_returned": len(posts)})
         except UnsafeURL as exc:
@@ -284,19 +304,26 @@ def _response_parts(raw: Any, fallback_url: str) -> tuple[int, str, str]:
 
 
 def _name_matches(page_name: str, query: str) -> bool:
-    """Whether the extracted page name plausibly matches the requested entity."""
+    """Whether the extracted page name plausibly matches the requested entity.
+
+    Both sides are normalized with the identity legal-suffix stripper so
+    ``Flipkart Pvt Ltd`` matches ``Flipkart Internet Pvt Ltd``.  A single-token
+    query must be an exact (normalized) match to avoid a prefix false positive
+    (``Infosys`` must not match ``Infosys Technologies``); multi-token queries
+    use token-run containment in either direction.
+    """
+    from .startup_identity import normalize_name
+
     if not query:
         # No display name to verify against; accept the page on name presence.
         return True
-    page = re.sub(r"[^a-z0-9]+", " ", page_name.casefold()).strip()
-    wanted = re.sub(r"[^a-z0-9]+", " ", query.casefold()).strip()
+    page = normalize_name(page_name)
+    wanted = normalize_name(query)
     if not page or not wanted:
         return True
-    # Token-run containment in either direction; requires >= 2 tokens to avoid
-    # single-word false positives (mirrors the ScrapeCreators article lane).
     page_tokens = page.split()
     wanted_tokens = wanted.split()
-    if len(wanted_tokens) < 2 and len(page_tokens) < 2:
+    if len(wanted_tokens) < 2 or len(page_tokens) < 2:
         return page == wanted
     return _token_run(wanted_tokens, page_tokens) or _token_run(page_tokens, wanted_tokens)
 

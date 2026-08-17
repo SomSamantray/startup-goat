@@ -101,10 +101,17 @@ def normalize_ticker(value: str | None) -> str:
 
 
 def normalize_handle(value: str | None) -> str:
-    """Normalize a social handle or profile URL to a bare lowercase handle."""
+    """Normalize a social handle or profile URL to a bare lowercase handle.
+
+    A URL with a path (``https://www.linkedin.com/company/inc42`` or
+    ``linkedin.com/company/inc42``) yields the last path segment — the vanity
+    slug.  A bare dotted handle with no path (``acme.x``) and a bare handle
+    (``@acme``) are kept as-is, preserving identity-key stability for existing
+    handle inputs.
+    """
     text = _clean(value).strip().rstrip("/")
-    first = text.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0]
-    if "://" in text or text.startswith("www.") or "." in first:
+    has_path = "/" in text.rstrip("/")
+    if "://" in text or text.startswith("www.") or has_path:
         path = (urlsplit(text if "://" in text else "https://" + text).path or "").strip("/")
         # A company-profile URL yields the vanity slug; a bare handle stays.
         segments = [segment for segment in path.split("/") if segment]

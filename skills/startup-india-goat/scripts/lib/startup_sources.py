@@ -63,8 +63,18 @@ def _startup_india_factory() -> StartupAdapter:
 
 
 def _linkedin_factory() -> StartupAdapter:
+    """Dispatch the LinkedIn adapter by the credential actually present.
+
+    A bearer token routes to the OAuth adapter; session cookies route to the
+    cookie-session adapter.  When both are set, cookies win (the newer lane).
+    """
+    from .env import read_secret_env
     from .linkedin_cookie import LinkedInCookieAdapter
-    return LinkedInCookieAdapter()
+    from .linkedin_token import LinkedInTokenAdapter
+
+    if read_secret_env("LINKEDIN_LI_AT"):
+        return LinkedInCookieAdapter()
+    return LinkedInTokenAdapter()
 
 
 def _tracxn_factory() -> StartupAdapter:

@@ -155,13 +155,6 @@ class TestSlugify(unittest.TestCase):
         self.assertEqual("flipkart-pvt-ltd", _slugify("Flipkart Pvt Ltd"))
 
 
-class TestSlugify(unittest.TestCase):
-    def test_display_name_to_slug(self):
-        self.assertEqual("inc42-media", _slugify("Inc42 Media"))
-        self.assertEqual("acme", _slugify("Acme"))
-        self.assertEqual("flipkart-pvt-ltd", _slugify("Flipkart Pvt Ltd"))
-
-
 class TestNameMatch(unittest.TestCase):
     def test_exact_and_contained(self):
         self.assertTrue(_name_matches("Inc42 Media", "Inc42 Media"))
@@ -170,10 +163,19 @@ class TestNameMatch(unittest.TestCase):
     def test_mismatch(self):
         self.assertFalse(_name_matches("Some Other Company", "Inc42 Media"))
 
-    def test_single_word_fuzzy_allowed(self):
-        # Single-word names fall back to exact comparison to avoid false hits.
-        self.assertFalse(_name_matches("Acme", "Apple"))
+    def test_single_token_prefix_not_accepted(self):
+        # "Infosys" must not match "Infosys Technologies" (an unrelated page).
+        self.assertFalse(_name_matches("Infosys Technologies", "Infosys"))
+
+    def test_single_word_exact_match(self):
         self.assertTrue(_name_matches("Acme", "Acme"))
+        self.assertFalse(_name_matches("Acme", "Apple"))
+
+    def test_legal_suffix_variants_match(self):
+        # Legal-form suffixes are stripped before comparison; a multi-token
+        # query with a suffix still matches the fuller page name.
+        self.assertTrue(_name_matches("Flipkart Internet Pvt Ltd", "Flipkart Internet"))
+        self.assertTrue(_name_matches("Acme Corporation", "Acme Corp"))
 
     def test_empty_query_accepts_page(self):
         self.assertTrue(_name_matches("Acme", ""))
@@ -192,17 +194,19 @@ class TestPostItems(unittest.TestCase):
             "Ola Electric Expands Into Energy Storage With Three New Products",
             "Zomato raises a fresh round to expand its delivery network",
         )
-        items = _post_items(html, max_posts=2, secrets=())
+        items = _post_items(html, entity_id="e1", max_posts=2, secrets=())
         self.assertEqual(2, len(items))
         self.assertEqual("post", items[0].metadata["claim_type"])
         self.assertIn("Ola Electric", items[0].body)
+        # Posts are bound to the entity so the pipeline keeps them.
+        self.assertEqual("e1", items[0].metadata["entity_id"])
 
     def test_no_post_block_returns_empty(self):
-        self.assertEqual([], _post_items("<html><body><p>no posts here</p></body></html>", max_posts=2, secrets=()))
+        self.assertEqual([], _post_items("<html><body><p>no posts here</p></body></html>", entity_id="e1", max_posts=2, secrets=()))
 
     def test_redacts_cookie_echo_in_posts(self):
         html = self._html(f"leaked token {COOKIES['li_at']} inside the post body")
-        items = _post_items(html, max_posts=1, secrets=(COOKIES["li_at"],))
+        items = _post_items(html, entity_id="e1", max_posts=1, secrets=(COOKIES["li_at"],))
         self.assertEqual(1, len(items))
         self.assertNotIn(COOKIES["li_at"], items[0].body)
 

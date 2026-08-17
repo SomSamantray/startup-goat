@@ -63,8 +63,8 @@ def _startup_india_factory() -> StartupAdapter:
 
 
 def _linkedin_factory() -> StartupAdapter:
-    from .linkedin_token import LinkedInTokenAdapter
-    return LinkedInTokenAdapter()
+    from .linkedin_cookie import LinkedInCookieAdapter
+    return LinkedInCookieAdapter()
 
 
 def _tracxn_factory() -> StartupAdapter:
@@ -154,7 +154,9 @@ def _always(_: Mapping[str, Any]) -> bool:
 
 
 def _has_linkedin_token(context: Mapping[str, Any]) -> bool:
-    return bool(context.get("LINKEDIN_ACCESS_TOKEN"))
+    # Either a bearer token or a cookie-session credential satisfies the
+    # authorized LinkedIn lane.
+    return bool(context.get("LINKEDIN_ACCESS_TOKEN") or context.get("LINKEDIN_LI_AT"))
 
 
 def _has_tracxn_access(context: Mapping[str, Any]) -> bool:
@@ -196,7 +198,7 @@ DEFAULT_SOURCE_REGISTRY: tuple[SourceCapability, ...] = (
     _registration("web", ("web", "web-search"), source_tier="secondary"),
     _registration(
         "linkedin", ("linkedin", "linkedin-token", "linkedin_token"), source_class="authorized",
-        predicate=_has_linkedin_token, required_context_keys=("LINKEDIN_ACCESS_TOKEN",),
+        predicate=_has_linkedin_token,
         requires_consent=True, source_tier="primary", adapter_factory=_linkedin_factory,
     ),
     _registration("yourstory", ("yourstory", "your-story"), source_tier="secondary", adapter_factory=_yourstory_factory),

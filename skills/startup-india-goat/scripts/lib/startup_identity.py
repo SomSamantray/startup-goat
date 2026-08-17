@@ -103,8 +103,12 @@ def normalize_ticker(value: str | None) -> str:
 def normalize_handle(value: str | None) -> str:
     """Normalize a social handle or profile URL to a bare lowercase handle."""
     text = _clean(value).strip().rstrip("/")
-    if "://" in text:
-        text = (urlsplit(text).path or "").strip("/").split("/")[-1]
+    first = text.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0]
+    if "://" in text or text.startswith("www.") or "." in first:
+        path = (urlsplit(text if "://" in text else "https://" + text).path or "").strip("/")
+        # A company-profile URL yields the vanity slug; a bare handle stays.
+        segments = [segment for segment in path.split("/") if segment]
+        text = segments[-1] if segments else text
     text = text.lstrip("@").split("?", 1)[0].split("#", 1)[0]
     return re.sub(r"[^a-z0-9._-]", "", text)
 

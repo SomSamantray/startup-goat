@@ -158,13 +158,20 @@ def _run_source(identity: StartupIdentity, capability: SourceCapability, *, conf
     # never copied into result metadata or logs.
     if adapter_kwargs.get("token"):
         context["LINKEDIN_ACCESS_TOKEN"] = True
+    if adapter_kwargs.get("cookies"):
+        # Boolean capability signal only — cookie values stay in adapter_kwargs
+        # and are read by the adapter for this call only.
+        context["LINKEDIN_LI_AT"] = True
     if adapter_kwargs.get("browser_envelope") or adapter_kwargs.get("envelope") or adapter_kwargs.get("token_response"):
         context["browser_consent"] = bool(consent)
         context["TRACXN_ACCESS_TOKEN"] = True
     # Presence checks use only a boolean capability signal; the secret stays in
     # the environment and is read by the adapter for this call only.
-    if source == "linkedin" and read_secret_env("LINKEDIN_ACCESS_TOKEN"):
-        context["LINKEDIN_ACCESS_TOKEN"] = True
+    if source == "linkedin" and (read_secret_env("LINKEDIN_ACCESS_TOKEN") or read_secret_env("LINKEDIN_LI_AT")):
+        if read_secret_env("LINKEDIN_ACCESS_TOKEN"):
+            context["LINKEDIN_ACCESS_TOKEN"] = True
+        if read_secret_env("LINKEDIN_LI_AT"):
+            context["LINKEDIN_LI_AT"] = True
     if not capability.is_capable(context) and capability.source_class != "public":
         return [], SourceOutcome(source=source, state="skipped-unconfigured", attempted=False, detail="source capability is not configured"), None
     try:
@@ -179,7 +186,7 @@ def _run_source(identity: StartupIdentity, capability: SourceCapability, *, conf
             if time.monotonic() - started > budget.timeout_seconds:
                 return [], SourceOutcome(source=source, state="timeout", detail="source timeout budget exceeded"), "timeout"
             return items, _report_outcome(report, source, len(items)), None
-        if mock and not any(key in adapter_kwargs for key in ("fetcher", "url", "browser_envelope", "envelope", "token_response", "token")):
+        if mock and not any(key in adapter_kwargs for key in ("fetcher", "url", "browser_envelope", "envelope", "token_response", "token", "cookies")):
             return [], SourceOutcome(source=source, state="no-results", attempted=False, detail="mock startup adapter has no fixture"), None
         adapter = capability.adapter_factory()
         call_kwargs = dict(adapter_kwargs)
@@ -187,6 +194,10 @@ def _run_source(identity: StartupIdentity, capability: SourceCapability, *, conf
             call_kwargs.setdefault("ticker", identity.tickers[0])
         if source == "startup-india" and identity.dpiit_ids:
             call_kwargs.setdefault("profile_id", identity.dpiit_ids[0])
+        if source == "linkedin" and identity.handles and "slug" not in call_kwargs:
+            # A user-supplied linkedin.com/company/<slug> handle is the only
+            # reliable slug source; display-name slugification is best-effort.
+            call_kwargs["slug"] = identity.handles[0]
         value = adapter.fetch(
             entity_id=identity.entity_id, query=identity.display_name,
             config=dict(config), timeout=budget.timeout_seconds, mock=mock, **call_kwargs,

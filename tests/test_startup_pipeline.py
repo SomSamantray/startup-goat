@@ -72,6 +72,58 @@ def test_gated_source_requires_consent_and_capability():
     assert result.entities[0].outcomes["linkedin"].state == "skipped-unconfigured"
 
 
+def test_linkedin_cookie_capability_activates_adapter(monkeypatch):
+    """A cookie-capable, consented run reaches the adapter with the cookies."""
+    from lib import startup_pipeline
+    from lib.linkedin_cookie import LinkedInCookieAdapter
+
+    seen = {}
+
+    def fake_fetch(self, *, entity_id, query, **kwargs):
+        seen["entity_id"] = entity_id
+        seen["cookies"] = kwargs.get("cookies")
+        seen["slug"] = kwargs.get("slug")
+        from lib.startup_public_base import AdapterResult, item, outcome
+        ev = item("linkedin", entity_id, url="https://www.linkedin.com/company/acme",
+                  title="Acme", body="profile", claim_type="company-profile")
+        return AdapterResult([ev], outcome("linkedin", "ok", items=1), {"entity_id": entity_id})
+
+    monkeypatch.setattr(LinkedInCookieAdapter, "fetch", fake_fetch)
+    result = research(
+        {"query": "Acme", "companies": ["Acme"], "sources": ["linkedin"]},
+        public_only=False, consent=True,
+        adapter_kwargs={"cookies": {"li_at": "dummy-li-at", "JSESSIONID": "ajax:1", "bcookie": "b"}},
+    )
+    assert seen["cookies"]["li_at"] == "dummy-li-at"
+    assert result.entities[0].outcomes["linkedin"].state == "ok"
+    # The cookie values never leak into the pipeline context or outcome.
+    assert "dummy-li-at" not in repr(result.entities[0].outcomes)
+    assert "dummy-li-at" not in repr(result.to_dict())
+
+
+def test_linkedin_handle_threaded_as_slug(monkeypatch):
+    """A user-supplied linkedin.com/company/<slug> handle becomes the slug."""
+    from lib.linkedin_cookie import LinkedInCookieAdapter
+
+    seen = {}
+
+    def fake_fetch(self, *, entity_id, query, **kwargs):
+        seen["slug"] = kwargs.get("slug")
+        from lib.startup_public_base import AdapterResult, item, outcome
+        ev = item("linkedin", entity_id, url="https://www.linkedin.com/company/inc42",
+                  title="Inc42 Media", body="profile", claim_type="company-profile")
+        return AdapterResult([ev], outcome("linkedin", "ok", items=1), {"entity_id": entity_id})
+
+    monkeypatch.setattr(LinkedInCookieAdapter, "fetch", fake_fetch)
+    result = research(
+        {"query": "Inc42 Media", "companies": [{"display_name": "Inc42 Media", "handles": ["linkedin.com/company/inc42"]}], "sources": ["linkedin"]},
+        public_only=False, consent=True,
+        adapter_kwargs={"cookies": {"li_at": "dummy-li-at"}},
+    )
+    assert seen["slug"] == "inc42"
+    assert result.entities[0].outcomes["linkedin"].state == "ok"
+
+
 def test_budget_validation_and_declarative_options():
     with pytest.raises(ValueError):
         parse_request("Acme", budgets={"max_entities": 0})

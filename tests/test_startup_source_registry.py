@@ -27,6 +27,7 @@ def test_registry_has_budgets_hooks_and_validated_adapter_interface():
         assert callable(source.adapter_factory)
         assert callable(source.adapter_factory().fetch)
     assert get_source("linkedin").is_capable({"LINKEDIN_ACCESS_TOKEN": "dummy"})
+    assert get_source("linkedin").is_capable({"LINKEDIN_LI_AT": "dummy-li-at"})
     assert not get_source("linkedin").is_capable({})
     assert get_source("tracxn").gated
 

@@ -16,6 +16,7 @@ from . import pipeline as generic_pipeline
 from .schema import SourceItem, SourceOutcome
 from .startup_schema import StartupIdentity
 from .startup_public_base import AdapterResult, outcome
+from .env import read_secret_env
 from .startup_sources import SourceCapability, resolve_source
 
 GENERIC_SOURCES = frozenset({"github", "reddit", "x", "youtube", "web"})
@@ -160,6 +161,10 @@ def _run_source(identity: StartupIdentity, capability: SourceCapability, *, conf
     if adapter_kwargs.get("browser_envelope") or adapter_kwargs.get("envelope") or adapter_kwargs.get("token_response"):
         context["browser_consent"] = bool(consent)
         context["TRACXN_ACCESS_TOKEN"] = True
+    # Presence checks use only a boolean capability signal; the secret stays in
+    # the environment and is read by the adapter for this call only.
+    if source == "linkedin" and read_secret_env("LINKEDIN_ACCESS_TOKEN"):
+        context["LINKEDIN_ACCESS_TOKEN"] = True
     if not capability.is_capable(context) and capability.source_class != "public":
         return [], SourceOutcome(source=source, state="skipped-unconfigured", attempted=False, detail="source capability is not configured"), None
     try:

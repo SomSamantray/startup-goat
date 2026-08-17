@@ -77,6 +77,20 @@ python3 skills/startup-india-goat/scripts/startup_goat.py --doctor
 
 Set a persistent artifact directory with `STARTUP_GOAT_MEMORY_DIR` (default: `~/Documents/StartupIndiaGOAT/`).
 
+### Optional LinkedIn access
+
+Use only an approved LinkedIn API bearer token. Do **not** paste it into chat, commit it, put it in a command-line argument, or use browser cookies/session tokens.
+
+```bash
+export LINKEDIN_ACCESS_TOKEN='paste-your-approved-token-in-your-shell'
+python3 skills/startup-india-goat/scripts/startup_goat.py \
+  "Acme" --source linkedin --include-gated --consent \
+  --save-dir ./startup-reports --emit=all
+unset LINKEDIN_ACCESS_TOKEN
+```
+
+The token is read from memory for the authorized request and is not written to reports. If the token is rejected, the report records `auth-failed`; never work around LinkedIn permissions or replay private Voyager requests.
+
 ## Reports and artifacts
 
 A saved run contains:

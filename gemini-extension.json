@@ -76,6 +76,12 @@
       "sensitive": true
     },
     {
+      "name": "LinkedIn session cookies",
+      "description": "User-supplied LinkedIn session cookies for the cookie-session adapter (optional; LINKEDIN_LI_AT plus LINKEDIN_JSESSIONID and LINKEDIN_BCOOKIE). Held in memory only.",
+      "envVar": "LINKEDIN_LI_AT",
+      "sensitive": true
+    },
+    {
       "name": "Tracxn access token",
       "description": "Explicitly supplied Tracxn token for permitted research (optional).",
       "envVar": "TRACXN_ACCESS_TOKEN",

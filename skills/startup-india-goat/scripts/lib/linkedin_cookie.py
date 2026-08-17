@@ -221,9 +221,9 @@ class LinkedInCookieAdapter:
         request = urllib.request.Request(url, headers=headers, method="GET")
         try:
             with opener.open(request, timeout=self.timeout) as response:
-                return int(response.status), response.read(2_000_001).decode("utf-8", "replace"), str(response.geturl() or url)
+                return int(response.status), _read_bounded(response, self.timeout), str(response.geturl() or url)
         except urllib.error.HTTPError as exc:
-            return int(exc.code), exc.read(2_000_001).decode("utf-8", "replace"), str(exc.geturl() or url)
+            return int(exc.code), _read_bounded(exc, self.timeout), str(exc.geturl() or url)
 
     def fetch(self, *, entity_id: str, query: str = "", slug: str | None = None,
               cookies: Mapping[str, str] | None = None, **_: Any) -> AdapterResult:
@@ -291,6 +291,34 @@ class LinkedInCookieAdapter:
         except Exception:
             # Never propagate provider text: response bodies may echo secrets.
             return AdapterResult([], outcome(self.source, "schema-drift", detail="LinkedIn response shape was not supported"), {"entity_id": entity_id, "access_state": "unknown", "access_mode": "cookie-session"})
+
+
+_MAX_BODY = 2_000_001
+
+
+def _read_bounded(handle: Any, timeout: float) -> str:
+    """Read a response body capped in size and total wall-time.
+
+    A slow-drip server must not hold a pipeline worker past ``timeout``: the
+    per-socket timeout only bounds each individual ``recv``, so a trickling
+    peer could otherwise extend the read indefinitely.
+    """
+    import time
+
+    started = time.monotonic()
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        if time.monotonic() - started > timeout:
+            break
+        chunk = handle.read(65_536)
+        if not chunk:
+            break
+        chunks.append(chunk)
+        total += len(chunk)
+        if total >= _MAX_BODY:
+            break
+    return b"".join(chunks)[:_MAX_BODY].decode("utf-8", "replace")
 
 
 def _response_parts(raw: Any, fallback_url: str) -> tuple[int, str, str]:
